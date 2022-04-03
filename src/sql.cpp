@@ -1,8 +1,7 @@
-
-#include "../header/sql.h"
-#include "../header/config.h"
-#include "../header/node.h"
-#include "../header/utils.h"
+#include "sql.h"
+#include "config.h"
+#include "node.h"
+#include "utils.h"
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
@@ -10,6 +9,7 @@
 #include <queue>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 void write_inorder(cond *condition, std::fstream &file) {
@@ -72,9 +72,9 @@ int create_table(const std::string &table_name, col_list *cols) {
       4.line : the table and column where this attribute is used as a reference
      .
   */
-  std::fstream file(PATH, std::ios::out | std::ios::ate);
+  std::fstream file(CATALOG_PATH, std::ios::out | std::ios::ate);
   if (!file)
-    return 0;
+    return 1;
   file << table_name << "\n";
   for (col *column : *cols) {
     col temp = *column;
@@ -84,8 +84,13 @@ int create_table(const std::string &table_name, col_list *cols) {
     file << "::" << temp.referencing_tab << "," << temp.referencing_col << "\n";
     file << "::\n";
   }
+  file.close();
+  std::fstream new_table(PATH + table_name, std::ios::out);
+  if (!new_table)
+    return 1;
+  new_table.close();
 
-  return 1;
+  return 0;
 }
 
 void makes_referenced_list(std::string &line, referenced_list &list) {
@@ -117,7 +122,20 @@ std::vector<cond *> make_cond_str_array(std::string &line) {
 }
 
 cond *buildtree(std::vector<cond *> &inorder, std::vector<cond *> &postorder,
-                int in_str, int in_end, std::unordered_map<cond *, int> &map);
+                int in_str, int in_end, std::unordered_map<cond *, int> &map,
+                int &index) {
+  if (in_str > in_end)
+    return nullptr;
+  cond *node = postorder[index];
+  index--;
+  if (in_str == in_end)
+    return node;
+  int mid_index = map[node];
+  node->right =
+      buildtree(inorder, postorder, mid_index + 1, in_end, map, index);
+  node->left = buildtree(inorder, postorder, in_str, mid_index - 1, map, index);
+  return node;
+}
 
 cond *get_condition(std::string &line) {
   std::vector<std::string> order = tokenize(line, "&");
@@ -126,6 +144,8 @@ cond *get_condition(std::string &line) {
   std::unordered_map<cond *, int> map;
   for (int i = 0; i < inorder.size(); i++)
     map[inorder[i]] = i;
+  int endIndex = inorder.size() - 1;
+  return buildtree(inorder, postorder, 0, (int)inorder.size(), map, endIndex);
 }
 
 col_list *get_table(const std::string &table_name) {
@@ -145,7 +165,7 @@ col_list *get_table(const std::string &table_name) {
   bool flag = check_table(table_name);
   if (!flag)
     return nullptr;
-  std::fstream file(PATH, std::ios::in);
+  std::fstream file(CATALOG_PATH, std::ios::in);
   std::string line;
   char temp;
   // compare each line with the table name
@@ -155,6 +175,8 @@ col_list *get_table(const std::string &table_name) {
       ;
     file.seekg((int)file.tellg() - line.length() - 1, file.beg);
   }
+
+  col_list *cols = new col_list;
   while (std::getline(file, line) and line[0] == ':') {
     // the line will contain the various info about the column
 
@@ -170,6 +192,9 @@ col_list *get_table(const std::string &table_name) {
     // i need to do it for conditions
     file.get(temp);
     file.get(temp);
+    std::getline(file, line);
+    cond *node = get_condition(line);
+    new_column->conditions = node;
 
     // this is for the attribute which is referenced by the current attribute
     file.get(temp);
@@ -188,5 +213,26 @@ col_list *get_table(const std::string &table_name) {
     referenced_list list;
     makes_referenced_list(line, list);
     new_column->referenced_list = list;
+    cols->push_back(new_column);
   }
+  return cols;
+}
+
+int raise_primary_key(col_list *cols, std::vector<std::string> *column_names) {
+  /*
+      @returns
+      1 : if column not found
+      0 : if every column is found in the cols
+  */
+  std::unordered_set<std::string> set;
+  for (std::string col_name : *column_names)
+    set.insert(col_name);
+  for (col *column : *cols)
+    if (set.find(column->column_name) != set.end()) {
+      column->primary_key = true;
+      set.erase(column->column_name);
+    }
+  if (set.empty() == true)
+    return 0;
+  return 1;
 }

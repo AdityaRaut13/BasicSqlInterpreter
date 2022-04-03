@@ -2,7 +2,7 @@
 	#include <iostream>
 	#include <string>
 	#include <vector>
-	#include "../header/node.h"
+	#include "node.h"
 	extern int yylex();
 	int yyerror(const char*);
 %}
@@ -50,10 +50,10 @@ create_stmt:CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA
 		{ // i need to check whether the table exist 
 			// if so then the raise an error
 			// otherwise i need to create the table
-			std::cout<<"table create statement top \n";
-			std::cout<<"|";
-			for(auto i : *$7)
-				std::cout<<i<<"|";
+            raise_foreign_key($5,$9);
+            raise_primary_key($5,$7);
+            create_table($3,$5);
+            
 	}
 	;
 
