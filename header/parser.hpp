@@ -86,7 +86,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 20 "sql.y"
+#line 11 "sql.y"
 
 	std::string* string;
 	int ival;

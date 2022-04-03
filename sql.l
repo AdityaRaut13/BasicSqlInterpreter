@@ -19,19 +19,26 @@ REFERENCES return REFERENCES;
 CHAR return CHAR;
 INT return INT;
 DECIMAL return DECIMAL;
-[-+]?[1-9][0-9]+ { yylval.ival=atoi(yytext); return NUMBER; }
+[-+]?[0-9]+ { yylval.ival=atoi(yytext);  return NUMBER; }
 
   /*[1-9][0-9]+\.[0-9]+([eE][+-]?[0-9]+)? { yylval.fval=atof(yytext); return FLOAT; }
 	*/
 
 \( return OPEN_PAR;
 \) return CLOSE_PAR;
-; return SEMICOLON;
+\; return SEMICOLON;
 , return COMMA;
+">" return GT;
+">=" return GE;
+"<" return LT;
+"<=" return LE;
+"=" return E;
+"!=" return NE;
 [a-zA-Z_][a-zA-Z0-9_]+ {
-	ylval.string=new std::string(yytext);
+	yylval.string=new std::string(yytext);
 	return IDENTIFIER;
 	}
+[ \t\n]+ {}
 
 . { }
 

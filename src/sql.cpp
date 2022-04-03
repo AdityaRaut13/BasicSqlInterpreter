@@ -57,7 +57,7 @@ int raise_foreign_key(col_list *cols, reference_list *refer_list) {
   return 0;
 }
 
-int create_table(const std::string &table_name, col_list *cols) {
+int create_table(std::string &table_name, col_list *cols) {
   /* open the file in append mode , write the table_name into the file then the
      column_name
    file structure :
@@ -162,9 +162,9 @@ col_list *get_table(const std::string &table_name) {
      4.line : the table and column where this attribute is used as a reference
    .
   */
-  bool flag = check_table(table_name);
-  if (!flag)
-    return nullptr;
+  // bool flag = check_table(table_name);
+  // if (!flag)
+  //  return nullptr;
   std::fstream file(CATALOG_PATH, std::ios::in);
   std::string line;
   char temp;
@@ -218,15 +218,16 @@ col_list *get_table(const std::string &table_name) {
   return cols;
 }
 
-int raise_primary_key(col_list *cols, std::vector<std::string> *column_names) {
+int raise_primary_key(col_list *cols,
+                      std::vector<std::string *> *column_names) {
   /*
       @returns
       1 : if column not found
       0 : if every column is found in the cols
   */
   std::unordered_set<std::string> set;
-  for (std::string col_name : *column_names)
-    set.insert(col_name);
+  for (std::string *col_name : *column_names)
+    set.insert(*col_name);
   for (col *column : *cols)
     if (set.find(column->column_name) != set.end()) {
       column->primary_key = true;

@@ -5,7 +5,7 @@
 #include "node.h"
 #include "parser.hpp"
 
-extern bool check_table(const std::string &table_name);
+// extern bool check_table(const std::string &table_name);
 
 extern col_list *get_table(const std::string &table_name);
 
@@ -16,6 +16,6 @@ extern col_list *get_table(const std::string &table_name);
 extern int raise_foreign_key(col_list *cols, reference_list *refer_list);
 // i have to do this one
 extern int raise_primary_key(col_list *cols,
-                             std::vector<std::string> *column_names);
+                             std::vector<std::string *> *column_names);
 
-extern int create_table(const std::string &table_name, col_list *col_list);
+extern int create_table(std::string &table_name, col_list *col_list);

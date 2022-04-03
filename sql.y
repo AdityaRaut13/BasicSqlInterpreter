@@ -3,6 +3,7 @@
 	#include <string>
 	#include <vector>
 	#include "node.h"
+    #include "sql.h"
 	extern int yylex();
 	int yyerror(const char*);
 %}
@@ -50,17 +51,18 @@ create_stmt:CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA
 		{ // i need to check whether the table exist 
 			// if so then the raise an error
 			// otherwise i need to create the table
+            std::cout<<"inside create statement";
             raise_foreign_key($5,$9);
             raise_primary_key($5,$7);
-            create_table($3,$5);
+            create_table(*$3,$5);
             
 	}
 	;
 
-primary_key:PRIMARY KEY OPEN_PAR columns CLOSE_PAR {$$=$4;}
+primary_key:PRIMARY KEY OPEN_PAR columns CLOSE_PAR { std::cout <<"inside primary keys\n"; $$=$4; std::cout<<"outside primary key\n"; }
 		 ;
 
-foreign_keys:  {$$=nullptr;}
+foreign_keys:  { std::cout<<"inside foreign_key\n";$$=nullptr;}
 		  | foreign_key { $$=new reference_list;$$->push_back($1); }
 		  | foreign_keys COMMA foreign_key { $1->push_back($3); $$=$1;  }
 		  ;
@@ -69,14 +71,14 @@ foreign_key:FOREIGN KEY OPEN_PAR column CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR
 	;
 
 
-columns:column { $$=new std::vector<std::string*>(); $$->push_back($1); }
-	  |columns COMMA column {$1->push_back($3);$$=$1;}
+columns:column { std::cout<<"inside columns\n"; $$=new std::vector<std::string*>(); $$->push_back($1); std::cout <<"outside column\n"; }
+	  |columns COMMA column { std::cout<<"inside coulumns 2 \n"; $1->push_back($3);$$=$1; std::cout<<"outside columns 2 \n"; }
 	  ;
-column:IDENTIFIER;
+column:IDENTIFIER { $$=$1;};
 
 
 
-definitions:definition { $$=new col_list(); $$->push_back($1); }
+definitions:definition { std::cout<<"inside definition\n"; $$=new col_list(); $$->push_back($1); }
 		|definitions COMMA definition { $1->push_back($3);$$=$1; }
 		;
 
