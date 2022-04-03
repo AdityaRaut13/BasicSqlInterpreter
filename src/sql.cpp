@@ -38,8 +38,8 @@ void write_condition(cond *conditions, std::fstream &file) {
 int raise_foreign_key(col_list *cols, reference_list *refer_list) {
   /*
   returs:
-      0 if error occured
-      1 if no error occured
+      1 if error occured
+      0 if no error occured
   */
   std::unordered_map<std::string, reference *> map;
   for (reference *refer : *refer_list)
@@ -53,8 +53,8 @@ int raise_foreign_key(col_list *cols, reference_list *refer_list) {
     }
   }
   if (map.size() == 0)
-    return 1;
-  return 0;
+    return 0;
+  return 1;
 }
 
 int create_table(std::string &table_name, col_list *cols) {
@@ -72,7 +72,7 @@ int create_table(std::string &table_name, col_list *cols) {
       4.line : the table and column where this attribute is used as a reference
      .
   */
-  std::fstream file(CATALOG_PATH, std::ios::out | std::ios::ate);
+  std::fstream file(CATALOG_PATH, std::ios::ate);
   if (!file)
     return 1;
   file << table_name << "\n";

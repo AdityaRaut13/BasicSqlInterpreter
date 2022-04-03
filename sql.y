@@ -47,7 +47,7 @@
 %%
 
 
-create_stmt:CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON
+create_stmt:CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key  COMMA foreign_keys CLOSE_PAR SEMICOLON
 		{ // i need to check whether the table exist 
 			// if so then the raise an error
 			// otherwise i need to create the table
@@ -57,16 +57,20 @@ create_stmt:CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA
             create_table(*$3,$5);
             
 	}
+    | CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key CLOSE_PAR SEMICOLON
+    {
+        raise_primary_key($5,$7);
+        create_table(*$3,$5);
+    }
 	;
 
 primary_key:PRIMARY KEY OPEN_PAR columns CLOSE_PAR { std::cout <<"inside primary keys\n"; $$=$4; std::cout<<"outside primary key\n"; }
 		 ;
 
-foreign_keys:  { std::cout<<"inside foreign_key\n";$$=nullptr;}
-		  | foreign_key { $$=new reference_list;$$->push_back($1); }
+foreign_keys: foreign_key { $$=new reference_list;$$->push_back($1); }
 		  | foreign_keys COMMA foreign_key { $1->push_back($3); $$=$1;  }
 		  ;
-foreign_key:FOREIGN KEY OPEN_PAR column CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR column CLOSE_PAR 
+foreign_key: FOREIGN KEY OPEN_PAR column CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR column CLOSE_PAR 
 		{ $$=new reference(*$7,*$9,*$4); delete $7; delete $9;delete $4; }
 	;
 
