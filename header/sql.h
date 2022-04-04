@@ -5,9 +5,9 @@
 #include "node.h"
 #include "parser.hpp"
 
-// extern bool check_table(const std::string &table_name);
+extern bool check_table(std::string &table_name);
 
-extern col_list *get_table(const std::string &table_name);
+extern col_list *get_table(std::string &table_name);
 
 /*
  * check the reference exist meaning that the table exits and the primary of the
@@ -19,3 +19,7 @@ extern int raise_primary_key(col_list *cols,
                              std::vector<std::string *> *column_names);
 
 extern int create_table(std::string &table_name, col_list *col_list);
+
+extern void display_table(col_list *cols);
+extern std::string convert_to_str(int type);
+extern std::string convert_to_str(cond *conditions);

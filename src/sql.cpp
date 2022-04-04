@@ -12,6 +12,48 @@
 #include <unordered_set>
 #include <vector>
 
+void get_to_table_in_catalog(std::fstream &file, std::string &table_name) {
+  std::string line;
+  // compare each line with the table name
+  while (std::getline(file, line) and line.compare(table_name) != 0) {
+    // skipping the column of the current table
+    while (std::getline(file, line) and line[0] == ':')
+      ;
+    file.seekg((int)file.tellg() - line.length() - 1, file.beg);
+  }
+}
+
+bool check_reference_exists(std::string &table_name, std::string &column_name,
+                            int type, int length) {
+  /*
+  The table will be checked for the column and also the column must be a
+  primary_key
+  */
+  std::fstream file(CATALOG_PATH, std::ios::in);
+  std::string line;
+  get_to_table_in_catalog(file, table_name);
+  while (std::getline(file, line) and line[0] == ':') {
+
+    std::vector<std::string> properties = tokenize(line, ":");
+    if (properties[0].compare(column_name) == 0 and
+        std::stoi(properties[1]) == type and
+        std::stoi(properties[2]) == length and properties[3].compare("1\n"))
+      return true;
+    std::getline(file, line);
+    std::getline(file, line);
+    std::getline(file, line);
+  }
+  file.close();
+  return false;
+}
+bool check_table(std::string &table_name) {
+
+  std::ifstream file(PATH + table_name);
+  return file.good();
+}
+
+// start of the writing the condition to the file
+
 void write_inorder(cond *condition, std::fstream &file) {
   if (condition != nullptr) {
     write_inorder(condition->left, file);
@@ -29,6 +71,8 @@ void write_postorder(cond *condition, std::fstream &file) {
 
 void write_condition(cond *conditions, std::fstream &file) {
   file << ":";
+  if (conditions == nullptr)
+    file << ":";
   write_inorder(conditions, file);
   file << "&";
   write_postorder(conditions, file);
@@ -85,11 +129,10 @@ int create_table(std::string &table_name, col_list *cols) {
     file << "::\n";
   }
   file.close();
-  std::fstream new_table(PATH + table_name, std::ios::out);
+  std::ofstream new_table(PATH + table_name);
   if (!new_table)
     return 1;
   new_table.close();
-
   return 0;
 }
 
@@ -148,7 +191,7 @@ cond *get_condition(std::string &line) {
   return buildtree(inorder, postorder, 0, (int)inorder.size(), map, endIndex);
 }
 
-col_list *get_table(const std::string &table_name) {
+col_list *get_table(std::string &table_name) {
   /*
   file structure :
     table_name
@@ -168,13 +211,7 @@ col_list *get_table(const std::string &table_name) {
   std::fstream file(CATALOG_PATH, std::ios::in);
   std::string line;
   char temp;
-  // compare each line with the table name
-  while (std::getline(file, line) and line.compare(table_name) != 0) {
-    // skipping the column of the current table
-    while (std::getline(file, line) and line[0] == ':')
-      ;
-    file.seekg((int)file.tellg() - line.length() - 1, file.beg);
-  }
+  get_to_table_in_catalog(file, table_name);
 
   col_list *cols = new col_list;
   while (std::getline(file, line) and line[0] == ':') {
@@ -189,7 +226,6 @@ col_list *get_table(const std::string &table_name) {
     new_column->primary_key = std::stoi(properties[3].substr(
         1)); // as the last character will contain new line character which
              // needs to be not taken in tokenize
-    // i need to do it for conditions
     file.get(temp);
     file.get(temp);
     std::getline(file, line);
@@ -236,4 +272,37 @@ int raise_primary_key(col_list *cols,
   if (set.empty() == true)
     return 0;
   return 1;
+}
+
+void display_table(col_list *cols) {
+  std::cout << "\n";
+  std::cout.width(20);
+  std::cout << "COLUMN NAME";
+  std::cout.width(10);
+  std::cout << "TYPE";
+  std::cout.width(15);
+  std::cout << "PRIMARY KEY";
+  std::cout.width(30);
+  std::cout << "CONDITIONS";
+  std::cout.width(15);
+  std::cout << "FOREIGN KEY";
+  std::cout << "\n";
+
+  for (col *column : *cols) {
+    std::cout.width(20);
+    std::cout << column->column_name;
+    std::cout.width(10);
+    std::cout << convert_to_str(column->type);
+    std::cout.width(15);
+    std::cout << column->primary_key;
+    std::cout.width(30);
+    std::cout << convert_to_str(column->conditions);
+    std::cout.width(15);
+    if (column->referencing_tab != "")
+      std::cout << "1";
+    else
+      std::cout << "0";
+    std::cout << "\n";
+  }
+  std::cout << "\n";
 }

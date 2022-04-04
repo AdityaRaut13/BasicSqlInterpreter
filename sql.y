@@ -26,6 +26,7 @@
 %token OPEN_PAR CLOSE_PAR SEMICOLON COMMA 
 %token OR AND
 %token GE GT LE LT E NE
+%token DESCRIBE
 
 
 %token <string> IDENTIFIER;
@@ -47,7 +48,7 @@
 %%
 
 
-create_stmt:CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key  COMMA foreign_keys CLOSE_PAR SEMICOLON
+create_stmt:CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON
 		{ // i need to check whether the table exist 
 			// if so then the raise an error
 			// otherwise i need to create the table
@@ -131,7 +132,61 @@ condition:  IDENTIFIER GE NUMBER { $$=new cond(GE,$3,*$1); delete $1; }
 
 
 
+describe_stmt: DESCRIBE  IDENTIFIER SEMICOLON
+             {
+                if(check_table(*$2)==true)
+                {
+                    col_list* cols=get_table(*$2);
+                    display_table(cols);
+                }
+                else
+                    yyerror("The Table Does not exists");
+             }
+             ;
+
+
+
+
+
+
+
+
+
+ /* need to create the insert statement*/
+
+
+
 %%
+
+
+std::string convert_to_string(int type)
+{
+    std::string result;
+    switch(type)
+    {
+        case GE:
+            result=">=";
+            break;
+        case GT:
+            result=">";
+            break ;
+        case LT:
+            result="<";
+            break;
+        case LE:
+            result="<=";
+            break;
+        case E:
+            reult="=";
+            break;
+    }
+    return result;
+    
+}
+std::string convert_to_string(cond* conditions)
+{
+
+}
 
 
 int yyerror(char const *s)
