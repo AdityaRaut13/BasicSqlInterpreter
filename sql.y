@@ -183,9 +183,29 @@ std::string convert_to_string(int type)
     return result;
     
 }
+
+
+
 std::string convert_to_string(cond* conditions)
 {
-
+    if(conditions==nullptr)
+        return "";
+    else if(conditions->relation_type==AND)
+    {
+        // visit the left edge and the right edge then join it.
+        std::string left=convert_to_string(conditions->left);
+        std::string right=convert_to_string(conditions->right);
+        return left + " AND " + right;
+    }
+    else if (conditions->relation_type==OR)
+    {
+        std::string left=convert_to_string(conditions->left);
+        std::string right=convert_to_string(conditions->right);
+        return left + " OR " + right;
+    }
+    return conditions->column_name+ " " +
+        convert_to_string(relation_type)+ " "+
+        +std::to_string(conditions->number);
 }
 
 
