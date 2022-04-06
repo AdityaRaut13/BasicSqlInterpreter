@@ -1,9 +1,9 @@
 department
 :departno:266:10:1
-:&
+::&
 ::,
 ::
 :depart_name:265:20:0
-:&
+::&
 ::,
 ::

@@ -43,10 +43,15 @@
 %type <condition> expr or_expr and_expr
 %type <condition> condition
 
-%start create_stmt
+%start statement
 
 %%
 
+
+
+statement:create_stmt
+         |describe_stmt
+         ;
 
 create_stmt:CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON
 		{ // i need to check whether the table exist 
@@ -159,54 +164,6 @@ describe_stmt: DESCRIBE  IDENTIFIER SEMICOLON
 %%
 
 
-std::string convert_to_string(int type)
-{
-    std::string result;
-    switch(type)
-    {
-        case GE:
-            result=">=";
-            break;
-        case GT:
-            result=">";
-            break ;
-        case LT:
-            result="<";
-            break;
-        case LE:
-            result="<=";
-            break;
-        case E:
-            reult="=";
-            break;
-    }
-    return result;
-    
-}
-
-
-
-std::string convert_to_string(cond* conditions)
-{
-    if(conditions==nullptr)
-        return "";
-    else if(conditions->relation_type==AND)
-    {
-        // visit the left edge and the right edge then join it.
-        std::string left=convert_to_string(conditions->left);
-        std::string right=convert_to_string(conditions->right);
-        return left + " AND " + right;
-    }
-    else if (conditions->relation_type==OR)
-    {
-        std::string left=convert_to_string(conditions->left);
-        std::string right=convert_to_string(conditions->right);
-        return left + " OR " + right;
-    }
-    return conditions->column_name+ " " +
-        convert_to_string(relation_type)+ " "+
-        +std::to_string(conditions->number);
-}
 
 
 int yyerror(char const *s)

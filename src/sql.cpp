@@ -2,11 +2,13 @@
 #include "config.h"
 #include "node.h"
 #include "utils.h"
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <queue>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -190,6 +192,11 @@ cond *get_condition(std::string &line) {
   int endIndex = inorder.size() - 1;
   return buildtree(inorder, postorder, 0, (int)inorder.size(), map, endIndex);
 }
+auto print = [](auto const &remark, auto const &v) {
+  std::cout << remark << " :";
+  for (auto &n : v)
+    std::cout << n << ",";
+};
 
 col_list *get_table(std::string &table_name) {
   /*
@@ -219,7 +226,9 @@ col_list *get_table(std::string &table_name) {
 
     col *new_column = new col();
     // this is for the properties rows in the columns
+    std::cout << line;
     std::vector<std::string> properties = tokenize(line, ":");
+    print("the properties are ", properties);
     new_column->column_name = properties[0];
     new_column->type = std::stoi(properties[1]);
     new_column->length = std::stoi(properties[2]);
@@ -251,6 +260,7 @@ col_list *get_table(std::string &table_name) {
     new_column->referenced_list = list;
     cols->push_back(new_column);
   }
+  std::cout << "the end get tables;\n";
   return cols;
 }
 
@@ -273,6 +283,45 @@ int raise_primary_key(col_list *cols,
     return 0;
   return 1;
 }
+std::string convert_to_string(int type) {
+  std::string result;
+  switch (type) {
+  case GE:
+    result = ">=";
+    break;
+  case GT:
+    result = ">";
+    break;
+  case LT:
+    result = "<";
+    break;
+  case LE:
+    result = "<=";
+    break;
+  case E:
+    result = "=";
+    break;
+  }
+  return result;
+}
+
+std::string convert_to_string(cond *conditions) {
+  if (conditions == nullptr)
+    return "";
+  else if (conditions->relation_type == AND) {
+    // visit the left edge and the right edge then join it.
+    std::string left = convert_to_string(conditions->left);
+    std::string right = convert_to_string(conditions->right);
+    return left + " AND " + right;
+  } else if (conditions->relation_type == OR) {
+    std::string left = convert_to_string(conditions->left);
+    std::string right = convert_to_string(conditions->right);
+    return left + " OR " + right;
+  }
+  return conditions->column_name + " " +
+         convert_to_string(conditions->relation_type) + " " +
+         std::to_string(conditions->number);
+}
 
 void display_table(col_list *cols) {
   std::cout << "\n";
@@ -292,11 +341,11 @@ void display_table(col_list *cols) {
     std::cout.width(20);
     std::cout << column->column_name;
     std::cout.width(10);
-    std::cout << convert_to_str(column->type);
+    std::cout << convert_to_string(column->type);
     std::cout.width(15);
     std::cout << column->primary_key;
     std::cout.width(30);
-    std::cout << convert_to_str(column->conditions);
+    std::cout << convert_to_string(column->conditions);
     std::cout.width(15);
     if (column->referencing_tab != "")
       std::cout << "1";

@@ -19,6 +19,7 @@ REFERENCES return REFERENCES;
 CHAR return CHAR;
 INT return INT;
 DECIMAL return DECIMAL;
+DESCRIBE return DESCRIBE;
 [-+]?[0-9]+ { yylval.ival=atoi(yytext);  return NUMBER; }
 
   /*[1-9][0-9]+\.[0-9]+([eE][+-]?[0-9]+)? { yylval.fval=atof(yytext); return FLOAT; }

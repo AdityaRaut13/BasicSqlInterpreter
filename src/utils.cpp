@@ -9,10 +9,12 @@ std::vector<std::string> tokenize(std::string s, std::string del) {
   int end = s.find(del);
   std::vector<std::string> result;
   while (end != -1) {
-    result.push_back(s.substr(start, end - start));
+    if (start != end)
+      result.push_back(s.substr(start, end - start));
     start = end + del.size();
     end = s.find(del, start);
   }
-  result.push_back(s.substr(start, end - start));
+  if (start != end)
+    result.push_back(s.substr(start, end - start));
   return result;
 }
