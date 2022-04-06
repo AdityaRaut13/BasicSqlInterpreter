@@ -7,12 +7,19 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <ostream>
 #include <queue>
-#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+auto print = [](auto const &remark, auto const &v) {
+  std::cout << remark << " :\n";
+  int index = 0;
+  for (auto n : v)
+    std::cout << index++ << "." << n << ",\n";
+  std::cout << "\n";
+};
 
 void get_to_table_in_catalog(std::fstream &file, std::string &table_name) {
   std::string line;
@@ -184,6 +191,8 @@ cond *buildtree(std::vector<cond *> &inorder, std::vector<cond *> &postorder,
 
 cond *get_condition(std::string &line) {
   std::vector<std::string> order = tokenize(line, "&");
+  if (order.size() < 2)
+    return nullptr;
   std::vector<cond *> inorder = make_cond_str_array(order[0]);
   std::vector<cond *> postorder = make_cond_str_array(order[1]);
   std::unordered_map<cond *, int> map;
@@ -192,11 +201,6 @@ cond *get_condition(std::string &line) {
   int endIndex = inorder.size() - 1;
   return buildtree(inorder, postorder, 0, (int)inorder.size(), map, endIndex);
 }
-auto print = [](auto const &remark, auto const &v) {
-  std::cout << remark << " :";
-  for (auto &n : v)
-    std::cout << n << ",";
-};
 
 col_list *get_table(std::string &table_name) {
   /*
@@ -215,6 +219,7 @@ col_list *get_table(std::string &table_name) {
   // bool flag = check_table(table_name);
   // if (!flag)
   //  return nullptr;
+  std::cout << "inside get function\n";
   std::fstream file(CATALOG_PATH, std::ios::in);
   std::string line;
   char temp;
@@ -226,30 +231,32 @@ col_list *get_table(std::string &table_name) {
 
     col *new_column = new col();
     // this is for the properties rows in the columns
-    std::cout << line;
     std::vector<std::string> properties = tokenize(line, ":");
-    print("the properties are ", properties);
+
     new_column->column_name = properties[0];
     new_column->type = std::stoi(properties[1]);
     new_column->length = std::stoi(properties[2]);
-    new_column->primary_key = std::stoi(properties[3].substr(
-        1)); // as the last character will contain new line character which
-             // needs to be not taken in tokenize
+    new_column->primary_key =
+        std::stoi(properties[3]); // as the last character will contain new line
+                                  // character which
+    // needs to be not taken in tokenize
     file.get(temp);
     file.get(temp);
     std::getline(file, line);
     cond *node = get_condition(line);
     new_column->conditions = node;
 
-    // this is for the attribute which is referenced by the current attribute
+    // this is for the attribute which is referenced by the current
+    // attribute
     file.get(temp);
     file.get(temp);
     std::getline(file, line);
     properties = tokenize(line, ",");
-    new_column->referencing_tab = properties[1];
-    new_column->referencing_col =
-        properties[2].substr(properties[2].length() - 1);
-
+    if (properties.size() == 2) {
+      new_column->referencing_tab = properties[1];
+      new_column->referencing_col =
+          properties[2].substr(properties[2].length() - 1);
+    }
     // this is for the attribute which are taking the refernece from this
     // attribute
     file.get(temp);

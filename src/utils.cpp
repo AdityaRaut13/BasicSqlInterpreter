@@ -14,7 +14,6 @@ std::vector<std::string> tokenize(std::string s, std::string del) {
     start = end + del.size();
     end = s.find(del, start);
   }
-  if (start != end)
-    result.push_back(s.substr(start, end - start));
+  result.push_back(s.substr(start, end - start));
   return result;
 }

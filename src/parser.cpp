@@ -1368,6 +1368,7 @@ yyreduce:
   case 34: /* describe_stmt: DESCRIBE IDENTIFIER SEMICOLON  */
 #line 141 "sql.y"
              {
+                std::cout<<"inside describe\n";
                 if(check_table(*(yyvsp[-1].string))==true)
                 {
                     col_list* cols=get_table(*(yyvsp[-1].string));
@@ -1376,11 +1377,11 @@ yyreduce:
                 else
                     yyerror("The Table Does not exists");
              }
-#line 1380 "src/parser.cpp"
+#line 1381 "src/parser.cpp"
     break;
 
 
-#line 1384 "src/parser.cpp"
+#line 1385 "src/parser.cpp"
 
       default: break;
     }
@@ -1574,7 +1575,7 @@ yyreturn:
   return yyresult;
 }
 
-#line 164 "sql.y"
+#line 165 "sql.y"
 
 
 

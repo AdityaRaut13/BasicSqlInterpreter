@@ -139,6 +139,7 @@ condition:  IDENTIFIER GE NUMBER { $$=new cond(GE,$3,*$1); delete $1; }
 
 describe_stmt: DESCRIBE  IDENTIFIER SEMICOLON
              {
+                std::cout<<"inside describe\n";
                 if(check_table(*$2)==true)
                 {
                     col_list* cols=get_table(*$2);
