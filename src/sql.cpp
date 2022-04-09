@@ -1,11 +1,13 @@
 #include "sql.h"
 #include "config.h"
 #include "node.h"
+#include "parser.hpp"
 #include "utils.h"
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
+#include <ios>
 #include <iostream>
 #include <ostream>
 #include <queue>
@@ -122,6 +124,53 @@ void write_condition(cond *conditions, std::fstream &file) {
   write_condition(conditions->right, file);
 }
 
+void add_reference_attr(reference_list *refer_list, std::string &table_name) {
+
+  /*
+    The reference
+
+  */
+  std::unordered_map<std::string, reference *> map;
+  for (reference *refer : *refer_list) {
+    map[refer->table_name] = refer;
+  }
+  std::fstream file(CATALOG_PATH);
+  std::string line;
+  std::vector<std::string> temp;
+  reference *refer;
+  while (std::getline(file, line) and line[0] != ':') {
+    if (map.find(line) != map.end()) {
+      refer = map[line];
+      while (std::getline(file, line)) {
+        temp = tokenize(line, ":");
+        if (temp[0].compare(refer->referenced_attr) == 0)
+          break;
+        std::getline(file, line);
+        std::getline(file, line);
+        std::getline(file, line);
+      }
+      if (!line.empty()) {
+        if (temp[3] == "0")
+          fatal("The key is not a primary key");
+        std::getline(file, line);
+        std::getline(file, line);
+        std::getline(file, line);
+        // file.seekg((int)file.tellg() - line.length() - 1, file.beg);
+        file.seekp((std::streamoff)file.tellg() - 1);
+        std::string temp = table_name + "," + refer->referencing_attr + ":";
+        file.write(temp.c_str(), temp.length());
+        file.seekg((std::streamoff)file.tellp() + 1);
+      }
+      map.erase(refer->table_name);
+
+    } else {
+      while (std::getline(file, line) and line[0] == ':')
+        ;
+      file.seekg((int)file.tellg() - line.length() - 1, file.beg);
+    }
+  }
+}
+
 int raise_foreign_key(col_list *cols, reference_list *refer_list) {
   /*
   returs:
@@ -142,12 +191,6 @@ int raise_foreign_key(col_list *cols, reference_list *refer_list) {
   if (map.size() == 0)
     return 0;
   return 1;
-}
-
-void add_reference_attr(reference_list *refer_list) {
-  std::unordered_map<std::string, std::unordered_set<std::string>> map;
-  for (reference *refer : *refer_list)
-    map[refer->table_name].insert(refer->referenced_attr);
 }
 
 int create_table(std::string &table_name, col_list *cols) {
@@ -191,7 +234,6 @@ void makes_referenced_list(std::string &line, referenced_list &list) {
   /*
      takes the input string parses it and then returns the result in list
   */
-  std::cout << line << "\n";
   std::vector<std::string> raw_referenced_list = tokenize(line, ":");
   std::vector<std::string> temp;
 
@@ -222,7 +264,6 @@ cond *get_condition(std::string &line, std::string &table_name) {
       number_str += line[position++];
     number = std::stoi(number_str);
     line = line.substr(position);
-    std::cout << line << "\n";
     node = new cond(relation_type, number, table_name);
     node->left = get_condition(line, table_name);
     node->right = get_condition(line, table_name);
@@ -267,29 +308,24 @@ col_list *get_table(std::string &table_name) {
         std::stoi(properties[3]); // as the last character will contain new line
                                   // character which
                                   // needs to be not taken in tokenize
-    std::cout << "after 1\n";
     file.get(temp);
     std::getline(file, line);
-    std::cout << line << "\n";
 
     new_column->conditions = get_condition(line, new_column->column_name);
 
     // this is for the attribute which is referenced by the current
     // attribute
-    std::cout << "after 2\n";
     file.get(temp);
     file.get(temp);
     std::getline(file, line);
     properties = tokenize(line, ",");
     if (properties.size() == 2) {
-      std::cout << "inside the properties\n";
       new_column->referencing_tab = properties[0];
       new_column->referencing_col =
           properties[1].substr(properties[1].length() - 1);
     }
     // this is for the attribute which are taking the refernece from this
     // attribute
-    std::cout << "outside the reference part\n";
     file.get(temp);
     file.get(temp);
     std::getline(file, line);
@@ -298,7 +334,6 @@ col_list *get_table(std::string &table_name) {
       makes_referenced_list(line, list);
     new_column->referenced_list = list;
     cols->push_back(new_column);
-    std::cout << "end of while loop\n";
   }
   return cols;
 }

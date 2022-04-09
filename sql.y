@@ -61,6 +61,7 @@ create_stmt:CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA
 		{ // i need to check whether the table exist 
 			// if so then the raise an error
 			// otherwise i need to create the table
+            add_reference_attr($9,*$3);
             
             raise_foreign_key($5,$9);
             raise_primary_key($5,$7);
@@ -74,7 +75,7 @@ create_stmt:CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA
     }
 	;
 
-primary_key:PRIMARY KEY OPEN_PAR columns CLOSE_PAR { std::cout <<"inside primary keys\n"; $$=$4; std::cout<<"outside primary key\n"; }
+primary_key:PRIMARY KEY OPEN_PAR columns CLOSE_PAR {  $$=$4;  }
 		 ;
 
 foreign_keys: foreign_key { $$=new reference_list;$$->push_back($1); }
@@ -85,8 +86,8 @@ foreign_key: FOREIGN KEY OPEN_PAR column CLOSE_PAR REFERENCES IDENTIFIER OPEN_PA
 	;
 
 
-columns:column { std::cout<<"inside columns\n"; $$=new std::vector<std::string*>(); $$->push_back($1); std::cout <<"outside column\n"; }
-	  |columns COMMA column { std::cout<<"inside coulumns 2 \n"; $1->push_back($3);$$=$1; std::cout<<"outside columns 2 \n"; }
+columns:column {  $$=new std::vector<std::string*>(); $$->push_back($1);  }
+	  |columns COMMA column {  $1->push_back($3);$$=$1;  }
 	  ;
 column:IDENTIFIER { $$=$1;};
 
@@ -149,7 +150,6 @@ condition:  IDENTIFIER GE NUMBER { $$=new cond(GE,$3,*$1); delete $1; }
 
 describe_stmt: DESCRIBE  IDENTIFIER SEMICOLON
              {
-                std::cout<<"inside describe statement \n";
                 if(check_table(*$2)==true)
                 {
                     col_list* cols=get_table(*$2);

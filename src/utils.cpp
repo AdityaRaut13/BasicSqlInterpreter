@@ -17,3 +17,8 @@ std::vector<std::string> tokenize(std::string s, std::string del) {
   result.push_back(s.substr(start, end - start));
   return result;
 }
+
+void fatal(const char *error) {
+  std::cout << "[ERROR]:" << error << "\n";
+  exit(0);
+}
