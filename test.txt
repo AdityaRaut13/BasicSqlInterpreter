@@ -1,0 +1,8 @@
+CREATE TABLE student ( id INT(10) CHECK id > 0 AND id < 100 , 
+    name CHAR(20),
+    departno INT(10),
+    PRIMARY KEY (id),
+    FOREIGN KEY (departno) REFERENCES department(departno)
+);
+DESCRIBE student;
+

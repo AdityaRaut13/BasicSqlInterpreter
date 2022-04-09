@@ -1,0 +1,28 @@
+{
+    "configurations": {
+        "Launch": {
+            "adapter": "vscode-cpptools",
+            "filetypes": [
+                "cpp",
+                "c",
+                "objc"
+            ],
+            "configuration": {
+                "stopOnEntry#json": "true",
+                "request": "launch",
+                "program": "sql",
+                "args": [
+                    "g++",
+                    "src/*.cpp",
+                    "-o",
+                    "sql",
+                    "-g",
+                    "-I",
+                    "header/"
+                ],
+                "cwd": "/home/interloper/Documents/academic/sem6/dbms/courseProject2.0",
+                "MIMode": "gdb"
+            }
+        }
+    }
+}

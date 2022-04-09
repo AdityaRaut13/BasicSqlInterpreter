@@ -1,0 +1,880 @@
+Grammar
+
+    0 $accept: statement $end
+
+    1 statement: create_stmt
+    2          | describe_stmt
+
+    3 create_stmt: CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON
+    4            | CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key CLOSE_PAR SEMICOLON
+
+    5 primary_key: PRIMARY KEY OPEN_PAR columns CLOSE_PAR
+
+    6 foreign_keys: foreign_key
+    7             | foreign_keys COMMA foreign_key
+
+    8 foreign_key: FOREIGN KEY OPEN_PAR column CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR column CLOSE_PAR
+
+    9 columns: column
+   10        | columns COMMA column
+
+   11 column: IDENTIFIER
+
+   12 definitions: definition
+   13            | definitions COMMA definition
+
+   14 definition: IDENTIFIER attr_type
+   15           | IDENTIFIER attr_type CHECK expr
+
+   16 attr_type: CHAR OPEN_PAR NUMBER CLOSE_PAR
+   17          | INT OPEN_PAR NUMBER CLOSE_PAR
+   18          | DECIMAL OPEN_PAR NUMBER CLOSE_PAR
+   19          | INT
+   20          | DECIMAL
+
+   21 expr: or_expr
+
+   22 or_expr: and_expr
+   23        | or_expr OR and_expr
+
+   24 and_expr: and_expr AND condition
+   25         | condition
+
+   26 condition: IDENTIFIER GE NUMBER
+   27          | IDENTIFIER GT NUMBER
+   28          | IDENTIFIER NE NUMBER
+   29          | IDENTIFIER LT NUMBER
+   30          | IDENTIFIER LE NUMBER
+   31          | IDENTIFIER E NUMBER
+   32          | OPEN_PAR expr CLOSE_PAR
+
+   33 describe_stmt: DESCRIBE IDENTIFIER SEMICOLON
+
+
+Terminals, with rules where they appear
+
+    $end (0) 0
+    error (256)
+    CREATE (258) 3 4
+    TABLE (259) 3 4
+    CHECK (260) 15
+    PRIMARY (261) 5
+    KEY (262) 5 8
+    FOREIGN (263) 8
+    REFERENCES (264) 8
+    CHAR (265) 16
+    INT (266) 17 19
+    DECIMAL (267) 18 20
+    OPEN_PAR (268) 3 4 5 8 16 17 18 32
+    CLOSE_PAR (269) 3 4 5 8 16 17 18 32
+    SEMICOLON (270) 3 4 33
+    COMMA (271) 3 4 7 10 13
+    OR (272) 23
+    AND (273) 24
+    GE (274) 26
+    GT (275) 27
+    LE (276) 30
+    LT (277) 29
+    E (278) 31
+    NE (279) 28
+    DESCRIBE (280) 33
+    IDENTIFIER <string> (281) 3 4 8 11 14 15 26 27 28 29 30 31 33
+    NUMBER <ival> (282) 16 17 18 26 27 28 29 30 31
+
+
+Nonterminals, with rules where they appear
+
+    $accept (28)
+        on left: 0
+    statement (29)
+        on left: 1 2
+        on right: 0
+    create_stmt (30)
+        on left: 3 4
+        on right: 1
+    primary_key <string_array> (31)
+        on left: 5
+        on right: 3 4
+    foreign_keys <refer_list> (32)
+        on left: 6 7
+        on right: 3 7
+    foreign_key <refer> (33)
+        on left: 8
+        on right: 6 7
+    columns <string_array> (34)
+        on left: 9 10
+        on right: 5 10
+    column <string> (35)
+        on left: 11
+        on right: 8 9 10
+    definitions <cols> (36)
+        on left: 12 13
+        on right: 3 4 13
+    definition <column> (37)
+        on left: 14 15
+        on right: 12 13
+    attr_type <column> (38)
+        on left: 16 17 18 19 20
+        on right: 14 15
+    expr <condition> (39)
+        on left: 21
+        on right: 15 32
+    or_expr <condition> (40)
+        on left: 22 23
+        on right: 21 23
+    and_expr <condition> (41)
+        on left: 24 25
+        on right: 22 23 24
+    condition <condition> (42)
+        on left: 26 27 28 29 30 31 32
+        on right: 24 25
+    describe_stmt (43)
+        on left: 33
+        on right: 2
+
+
+State 0
+
+    0 $accept: • statement $end
+    1 statement: • create_stmt
+    2          | • describe_stmt
+    3 create_stmt: • CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON
+    4            | • CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key CLOSE_PAR SEMICOLON
+   33 describe_stmt: • DESCRIBE IDENTIFIER SEMICOLON
+
+    CREATE    shift, and go to state 1
+    DESCRIBE  shift, and go to state 2
+
+    statement      go to state 3
+    create_stmt    go to state 4
+    describe_stmt  go to state 5
+
+
+State 1
+
+    3 create_stmt: CREATE • TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON
+    4            | CREATE • TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key CLOSE_PAR SEMICOLON
+
+    TABLE  shift, and go to state 6
+
+
+State 2
+
+   33 describe_stmt: DESCRIBE • IDENTIFIER SEMICOLON
+
+    IDENTIFIER  shift, and go to state 7
+
+
+State 3
+
+    0 $accept: statement • $end
+
+    $end  shift, and go to state 8
+
+
+State 4
+
+    1 statement: create_stmt •
+
+    $default  reduce using rule 1 (statement)
+
+
+State 5
+
+    2 statement: describe_stmt •
+
+    $default  reduce using rule 2 (statement)
+
+
+State 6
+
+    3 create_stmt: CREATE TABLE • IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON
+    4            | CREATE TABLE • IDENTIFIER OPEN_PAR definitions COMMA primary_key CLOSE_PAR SEMICOLON
+
+    IDENTIFIER  shift, and go to state 9
+
+
+State 7
+
+   33 describe_stmt: DESCRIBE IDENTIFIER • SEMICOLON
+
+    SEMICOLON  shift, and go to state 10
+
+
+State 8
+
+    0 $accept: statement $end •
+
+    $default  accept
+
+
+State 9
+
+    3 create_stmt: CREATE TABLE IDENTIFIER • OPEN_PAR definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON
+    4            | CREATE TABLE IDENTIFIER • OPEN_PAR definitions COMMA primary_key CLOSE_PAR SEMICOLON
+
+    OPEN_PAR  shift, and go to state 11
+
+
+State 10
+
+   33 describe_stmt: DESCRIBE IDENTIFIER SEMICOLON •
+
+    $default  reduce using rule 33 (describe_stmt)
+
+
+State 11
+
+    3 create_stmt: CREATE TABLE IDENTIFIER OPEN_PAR • definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON
+    4            | CREATE TABLE IDENTIFIER OPEN_PAR • definitions COMMA primary_key CLOSE_PAR SEMICOLON
+   12 definitions: • definition
+   13            | • definitions COMMA definition
+   14 definition: • IDENTIFIER attr_type
+   15           | • IDENTIFIER attr_type CHECK expr
+
+    IDENTIFIER  shift, and go to state 12
+
+    definitions  go to state 13
+    definition   go to state 14
+
+
+State 12
+
+   14 definition: IDENTIFIER • attr_type
+   15           | IDENTIFIER • attr_type CHECK expr
+   16 attr_type: • CHAR OPEN_PAR NUMBER CLOSE_PAR
+   17          | • INT OPEN_PAR NUMBER CLOSE_PAR
+   18          | • DECIMAL OPEN_PAR NUMBER CLOSE_PAR
+   19          | • INT
+   20          | • DECIMAL
+
+    CHAR     shift, and go to state 15
+    INT      shift, and go to state 16
+    DECIMAL  shift, and go to state 17
+
+    attr_type  go to state 18
+
+
+State 13
+
+    3 create_stmt: CREATE TABLE IDENTIFIER OPEN_PAR definitions • COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON
+    4            | CREATE TABLE IDENTIFIER OPEN_PAR definitions • COMMA primary_key CLOSE_PAR SEMICOLON
+   13 definitions: definitions • COMMA definition
+
+    COMMA  shift, and go to state 19
+
+
+State 14
+
+   12 definitions: definition •
+
+    $default  reduce using rule 12 (definitions)
+
+
+State 15
+
+   16 attr_type: CHAR • OPEN_PAR NUMBER CLOSE_PAR
+
+    OPEN_PAR  shift, and go to state 20
+
+
+State 16
+
+   17 attr_type: INT • OPEN_PAR NUMBER CLOSE_PAR
+   19          | INT •  [CHECK, COMMA]
+
+    OPEN_PAR  shift, and go to state 21
+
+    $default  reduce using rule 19 (attr_type)
+
+
+State 17
+
+   18 attr_type: DECIMAL • OPEN_PAR NUMBER CLOSE_PAR
+   20          | DECIMAL •  [CHECK, COMMA]
+
+    OPEN_PAR  shift, and go to state 22
+
+    $default  reduce using rule 20 (attr_type)
+
+
+State 18
+
+   14 definition: IDENTIFIER attr_type •  [COMMA]
+   15           | IDENTIFIER attr_type • CHECK expr
+
+    CHECK  shift, and go to state 23
+
+    $default  reduce using rule 14 (definition)
+
+
+State 19
+
+    3 create_stmt: CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA • primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON
+    4            | CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA • primary_key CLOSE_PAR SEMICOLON
+    5 primary_key: • PRIMARY KEY OPEN_PAR columns CLOSE_PAR
+   13 definitions: definitions COMMA • definition
+   14 definition: • IDENTIFIER attr_type
+   15           | • IDENTIFIER attr_type CHECK expr
+
+    PRIMARY     shift, and go to state 24
+    IDENTIFIER  shift, and go to state 12
+
+    primary_key  go to state 25
+    definition   go to state 26
+
+
+State 20
+
+   16 attr_type: CHAR OPEN_PAR • NUMBER CLOSE_PAR
+
+    NUMBER  shift, and go to state 27
+
+
+State 21
+
+   17 attr_type: INT OPEN_PAR • NUMBER CLOSE_PAR
+
+    NUMBER  shift, and go to state 28
+
+
+State 22
+
+   18 attr_type: DECIMAL OPEN_PAR • NUMBER CLOSE_PAR
+
+    NUMBER  shift, and go to state 29
+
+
+State 23
+
+   15 definition: IDENTIFIER attr_type CHECK • expr
+   21 expr: • or_expr
+   22 or_expr: • and_expr
+   23        | • or_expr OR and_expr
+   24 and_expr: • and_expr AND condition
+   25         | • condition
+   26 condition: • IDENTIFIER GE NUMBER
+   27          | • IDENTIFIER GT NUMBER
+   28          | • IDENTIFIER NE NUMBER
+   29          | • IDENTIFIER LT NUMBER
+   30          | • IDENTIFIER LE NUMBER
+   31          | • IDENTIFIER E NUMBER
+   32          | • OPEN_PAR expr CLOSE_PAR
+
+    OPEN_PAR    shift, and go to state 30
+    IDENTIFIER  shift, and go to state 31
+
+    expr       go to state 32
+    or_expr    go to state 33
+    and_expr   go to state 34
+    condition  go to state 35
+
+
+State 24
+
+    5 primary_key: PRIMARY • KEY OPEN_PAR columns CLOSE_PAR
+
+    KEY  shift, and go to state 36
+
+
+State 25
+
+    3 create_stmt: CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key • COMMA foreign_keys CLOSE_PAR SEMICOLON
+    4            | CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key • CLOSE_PAR SEMICOLON
+
+    CLOSE_PAR  shift, and go to state 37
+    COMMA      shift, and go to state 38
+
+
+State 26
+
+   13 definitions: definitions COMMA definition •
+
+    $default  reduce using rule 13 (definitions)
+
+
+State 27
+
+   16 attr_type: CHAR OPEN_PAR NUMBER • CLOSE_PAR
+
+    CLOSE_PAR  shift, and go to state 39
+
+
+State 28
+
+   17 attr_type: INT OPEN_PAR NUMBER • CLOSE_PAR
+
+    CLOSE_PAR  shift, and go to state 40
+
+
+State 29
+
+   18 attr_type: DECIMAL OPEN_PAR NUMBER • CLOSE_PAR
+
+    CLOSE_PAR  shift, and go to state 41
+
+
+State 30
+
+   21 expr: • or_expr
+   22 or_expr: • and_expr
+   23        | • or_expr OR and_expr
+   24 and_expr: • and_expr AND condition
+   25         | • condition
+   26 condition: • IDENTIFIER GE NUMBER
+   27          | • IDENTIFIER GT NUMBER
+   28          | • IDENTIFIER NE NUMBER
+   29          | • IDENTIFIER LT NUMBER
+   30          | • IDENTIFIER LE NUMBER
+   31          | • IDENTIFIER E NUMBER
+   32          | • OPEN_PAR expr CLOSE_PAR
+   32          | OPEN_PAR • expr CLOSE_PAR
+
+    OPEN_PAR    shift, and go to state 30
+    IDENTIFIER  shift, and go to state 31
+
+    expr       go to state 42
+    or_expr    go to state 33
+    and_expr   go to state 34
+    condition  go to state 35
+
+
+State 31
+
+   26 condition: IDENTIFIER • GE NUMBER
+   27          | IDENTIFIER • GT NUMBER
+   28          | IDENTIFIER • NE NUMBER
+   29          | IDENTIFIER • LT NUMBER
+   30          | IDENTIFIER • LE NUMBER
+   31          | IDENTIFIER • E NUMBER
+
+    GE  shift, and go to state 43
+    GT  shift, and go to state 44
+    LE  shift, and go to state 45
+    LT  shift, and go to state 46
+    E   shift, and go to state 47
+    NE  shift, and go to state 48
+
+
+State 32
+
+   15 definition: IDENTIFIER attr_type CHECK expr •
+
+    $default  reduce using rule 15 (definition)
+
+
+State 33
+
+   21 expr: or_expr •  [CLOSE_PAR, COMMA]
+   23 or_expr: or_expr • OR and_expr
+
+    OR  shift, and go to state 49
+
+    $default  reduce using rule 21 (expr)
+
+
+State 34
+
+   22 or_expr: and_expr •  [CLOSE_PAR, COMMA, OR]
+   24 and_expr: and_expr • AND condition
+
+    AND  shift, and go to state 50
+
+    $default  reduce using rule 22 (or_expr)
+
+
+State 35
+
+   25 and_expr: condition •
+
+    $default  reduce using rule 25 (and_expr)
+
+
+State 36
+
+    5 primary_key: PRIMARY KEY • OPEN_PAR columns CLOSE_PAR
+
+    OPEN_PAR  shift, and go to state 51
+
+
+State 37
+
+    4 create_stmt: CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key CLOSE_PAR • SEMICOLON
+
+    SEMICOLON  shift, and go to state 52
+
+
+State 38
+
+    3 create_stmt: CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA • foreign_keys CLOSE_PAR SEMICOLON
+    6 foreign_keys: • foreign_key
+    7             | • foreign_keys COMMA foreign_key
+    8 foreign_key: • FOREIGN KEY OPEN_PAR column CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR column CLOSE_PAR
+
+    FOREIGN  shift, and go to state 53
+
+    foreign_keys  go to state 54
+    foreign_key   go to state 55
+
+
+State 39
+
+   16 attr_type: CHAR OPEN_PAR NUMBER CLOSE_PAR •
+
+    $default  reduce using rule 16 (attr_type)
+
+
+State 40
+
+   17 attr_type: INT OPEN_PAR NUMBER CLOSE_PAR •
+
+    $default  reduce using rule 17 (attr_type)
+
+
+State 41
+
+   18 attr_type: DECIMAL OPEN_PAR NUMBER CLOSE_PAR •
+
+    $default  reduce using rule 18 (attr_type)
+
+
+State 42
+
+   32 condition: OPEN_PAR expr • CLOSE_PAR
+
+    CLOSE_PAR  shift, and go to state 56
+
+
+State 43
+
+   26 condition: IDENTIFIER GE • NUMBER
+
+    NUMBER  shift, and go to state 57
+
+
+State 44
+
+   27 condition: IDENTIFIER GT • NUMBER
+
+    NUMBER  shift, and go to state 58
+
+
+State 45
+
+   30 condition: IDENTIFIER LE • NUMBER
+
+    NUMBER  shift, and go to state 59
+
+
+State 46
+
+   29 condition: IDENTIFIER LT • NUMBER
+
+    NUMBER  shift, and go to state 60
+
+
+State 47
+
+   31 condition: IDENTIFIER E • NUMBER
+
+    NUMBER  shift, and go to state 61
+
+
+State 48
+
+   28 condition: IDENTIFIER NE • NUMBER
+
+    NUMBER  shift, and go to state 62
+
+
+State 49
+
+   23 or_expr: or_expr OR • and_expr
+   24 and_expr: • and_expr AND condition
+   25         | • condition
+   26 condition: • IDENTIFIER GE NUMBER
+   27          | • IDENTIFIER GT NUMBER
+   28          | • IDENTIFIER NE NUMBER
+   29          | • IDENTIFIER LT NUMBER
+   30          | • IDENTIFIER LE NUMBER
+   31          | • IDENTIFIER E NUMBER
+   32          | • OPEN_PAR expr CLOSE_PAR
+
+    OPEN_PAR    shift, and go to state 30
+    IDENTIFIER  shift, and go to state 31
+
+    and_expr   go to state 63
+    condition  go to state 35
+
+
+State 50
+
+   24 and_expr: and_expr AND • condition
+   26 condition: • IDENTIFIER GE NUMBER
+   27          | • IDENTIFIER GT NUMBER
+   28          | • IDENTIFIER NE NUMBER
+   29          | • IDENTIFIER LT NUMBER
+   30          | • IDENTIFIER LE NUMBER
+   31          | • IDENTIFIER E NUMBER
+   32          | • OPEN_PAR expr CLOSE_PAR
+
+    OPEN_PAR    shift, and go to state 30
+    IDENTIFIER  shift, and go to state 31
+
+    condition  go to state 64
+
+
+State 51
+
+    5 primary_key: PRIMARY KEY OPEN_PAR • columns CLOSE_PAR
+    9 columns: • column
+   10        | • columns COMMA column
+   11 column: • IDENTIFIER
+
+    IDENTIFIER  shift, and go to state 65
+
+    columns  go to state 66
+    column   go to state 67
+
+
+State 52
+
+    4 create_stmt: CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key CLOSE_PAR SEMICOLON •
+
+    $default  reduce using rule 4 (create_stmt)
+
+
+State 53
+
+    8 foreign_key: FOREIGN • KEY OPEN_PAR column CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR column CLOSE_PAR
+
+    KEY  shift, and go to state 68
+
+
+State 54
+
+    3 create_stmt: CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA foreign_keys • CLOSE_PAR SEMICOLON
+    7 foreign_keys: foreign_keys • COMMA foreign_key
+
+    CLOSE_PAR  shift, and go to state 69
+    COMMA      shift, and go to state 70
+
+
+State 55
+
+    6 foreign_keys: foreign_key •
+
+    $default  reduce using rule 6 (foreign_keys)
+
+
+State 56
+
+   32 condition: OPEN_PAR expr CLOSE_PAR •
+
+    $default  reduce using rule 32 (condition)
+
+
+State 57
+
+   26 condition: IDENTIFIER GE NUMBER •
+
+    $default  reduce using rule 26 (condition)
+
+
+State 58
+
+   27 condition: IDENTIFIER GT NUMBER •
+
+    $default  reduce using rule 27 (condition)
+
+
+State 59
+
+   30 condition: IDENTIFIER LE NUMBER •
+
+    $default  reduce using rule 30 (condition)
+
+
+State 60
+
+   29 condition: IDENTIFIER LT NUMBER •
+
+    $default  reduce using rule 29 (condition)
+
+
+State 61
+
+   31 condition: IDENTIFIER E NUMBER •
+
+    $default  reduce using rule 31 (condition)
+
+
+State 62
+
+   28 condition: IDENTIFIER NE NUMBER •
+
+    $default  reduce using rule 28 (condition)
+
+
+State 63
+
+   23 or_expr: or_expr OR and_expr •  [CLOSE_PAR, COMMA, OR]
+   24 and_expr: and_expr • AND condition
+
+    AND  shift, and go to state 50
+
+    $default  reduce using rule 23 (or_expr)
+
+
+State 64
+
+   24 and_expr: and_expr AND condition •
+
+    $default  reduce using rule 24 (and_expr)
+
+
+State 65
+
+   11 column: IDENTIFIER •
+
+    $default  reduce using rule 11 (column)
+
+
+State 66
+
+    5 primary_key: PRIMARY KEY OPEN_PAR columns • CLOSE_PAR
+   10 columns: columns • COMMA column
+
+    CLOSE_PAR  shift, and go to state 71
+    COMMA      shift, and go to state 72
+
+
+State 67
+
+    9 columns: column •
+
+    $default  reduce using rule 9 (columns)
+
+
+State 68
+
+    8 foreign_key: FOREIGN KEY • OPEN_PAR column CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR column CLOSE_PAR
+
+    OPEN_PAR  shift, and go to state 73
+
+
+State 69
+
+    3 create_stmt: CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR • SEMICOLON
+
+    SEMICOLON  shift, and go to state 74
+
+
+State 70
+
+    7 foreign_keys: foreign_keys COMMA • foreign_key
+    8 foreign_key: • FOREIGN KEY OPEN_PAR column CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR column CLOSE_PAR
+
+    FOREIGN  shift, and go to state 53
+
+    foreign_key  go to state 75
+
+
+State 71
+
+    5 primary_key: PRIMARY KEY OPEN_PAR columns CLOSE_PAR •
+
+    $default  reduce using rule 5 (primary_key)
+
+
+State 72
+
+   10 columns: columns COMMA • column
+   11 column: • IDENTIFIER
+
+    IDENTIFIER  shift, and go to state 65
+
+    column  go to state 76
+
+
+State 73
+
+    8 foreign_key: FOREIGN KEY OPEN_PAR • column CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR column CLOSE_PAR
+   11 column: • IDENTIFIER
+
+    IDENTIFIER  shift, and go to state 65
+
+    column  go to state 77
+
+
+State 74
+
+    3 create_stmt: CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON •
+
+    $default  reduce using rule 3 (create_stmt)
+
+
+State 75
+
+    7 foreign_keys: foreign_keys COMMA foreign_key •
+
+    $default  reduce using rule 7 (foreign_keys)
+
+
+State 76
+
+   10 columns: columns COMMA column •
+
+    $default  reduce using rule 10 (columns)
+
+
+State 77
+
+    8 foreign_key: FOREIGN KEY OPEN_PAR column • CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR column CLOSE_PAR
+
+    CLOSE_PAR  shift, and go to state 78
+
+
+State 78
+
+    8 foreign_key: FOREIGN KEY OPEN_PAR column CLOSE_PAR • REFERENCES IDENTIFIER OPEN_PAR column CLOSE_PAR
+
+    REFERENCES  shift, and go to state 79
+
+
+State 79
+
+    8 foreign_key: FOREIGN KEY OPEN_PAR column CLOSE_PAR REFERENCES • IDENTIFIER OPEN_PAR column CLOSE_PAR
+
+    IDENTIFIER  shift, and go to state 80
+
+
+State 80
+
+    8 foreign_key: FOREIGN KEY OPEN_PAR column CLOSE_PAR REFERENCES IDENTIFIER • OPEN_PAR column CLOSE_PAR
+
+    OPEN_PAR  shift, and go to state 81
+
+
+State 81
+
+    8 foreign_key: FOREIGN KEY OPEN_PAR column CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR • column CLOSE_PAR
+   11 column: • IDENTIFIER
+
+    IDENTIFIER  shift, and go to state 65
+
+    column  go to state 82
+
+
+State 82
+
+    8 foreign_key: FOREIGN KEY OPEN_PAR column CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR column • CLOSE_PAR
+
+    CLOSE_PAR  shift, and go to state 83
+
+
+State 83
+
+    8 foreign_key: FOREIGN KEY OPEN_PAR column CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR column CLOSE_PAR •
+
+    $default  reduce using rule 8 (foreign_key)

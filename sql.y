@@ -6,6 +6,7 @@
     #include "sql.h"
 	extern int yylex();
 	int yyerror(const char*);
+    extern FILE* yyin;
 %}
 %union
 {
@@ -18,7 +19,6 @@
 	reference_list* refer_list;
 	cond* condition;
 }
-
 
 
 %token CREATE TABLE CHECK PRIMARY KEY FOREIGN REFERENCES
@@ -43,11 +43,15 @@
 %type <condition> expr or_expr and_expr
 %type <condition> condition
 
-%start statement
+%start statements
+
 
 %%
 
 
+statements:statement
+          | statements statement
+          ;
 
 statement:create_stmt
          |describe_stmt
@@ -57,7 +61,7 @@ create_stmt:CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA
 		{ // i need to check whether the table exist 
 			// if so then the raise an error
 			// otherwise i need to create the table
-            std::cout<<"inside create statement";
+            
             raise_foreign_key($5,$9);
             raise_primary_key($5,$7);
             create_table(*$3,$5);
@@ -88,8 +92,14 @@ column:IDENTIFIER { $$=$1;};
 
 
 
-definitions:definition { std::cout<<"inside definition\n"; $$=new col_list(); $$->push_back($1); }
-		|definitions COMMA definition { $1->push_back($3);$$=$1; }
+definitions:definition { 
+           $$=new col_list;
+           $$->push_back($1);
+           }
+		| definitions COMMA definition { 
+            $1->push_back($3);
+            $$=$1;
+        }
 		;
 
 definition: IDENTIFIER attr_type { $2->column_name=*$1; $$=$2; delete $1; }
@@ -139,7 +149,7 @@ condition:  IDENTIFIER GE NUMBER { $$=new cond(GE,$3,*$1); delete $1; }
 
 describe_stmt: DESCRIBE  IDENTIFIER SEMICOLON
              {
-                std::cout<<"inside describe\n";
+                std::cout<<"inside describe statement \n";
                 if(check_table(*$2)==true)
                 {
                     col_list* cols=get_table(*$2);
@@ -174,9 +184,12 @@ int yyerror(char const *s)
 }
 
 
-int main()
+int main(int argc,char* argv[])
 {
+    /* yydebug=1; */
+    yyin=fopen("test.txt","r");
 	yyparse();
+    fclose(yyin);
 	return 0;
 }
 

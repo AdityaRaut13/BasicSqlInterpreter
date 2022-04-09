@@ -1,9 +1,13 @@
-department
-:departno:266:10:1
-::&
+student
+:id:266:10:1
+::273 -1:275 0##:277 100##
 ::,
 ::
-:depart_name:265:20:0
-::&
+:name:265:20:0
+:#
 ::,
+::
+:departno:266:10:0
+:#
+::department,departno
 ::

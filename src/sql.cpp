@@ -9,17 +9,66 @@
 #include <iostream>
 #include <ostream>
 #include <queue>
+#include <sstream>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-auto print = [](auto const &remark, auto const &v) {
-  std::cout << remark << " :\n";
-  int index = 0;
+
+auto print = [](auto &remark, auto &v) {
+  std::cout << remark << " :";
   for (auto n : v)
-    std::cout << index++ << "." << n << ",\n";
+    std::cout << n << "|";
   std::cout << "\n";
 };
+std::string convert_to_string(int type) {
+  std::string result;
+  switch (type) {
+  case CHAR:
+    result = "CHAR";
+    break;
+  case INT:
+    result = "INT";
+    break;
+  case DECIMAL:
+    result = "DECIMAL";
+    break;
+  case GE:
+    result = ">=";
+    break;
+  case GT:
+    result = ">";
+    break;
+  case LT:
+    result = "<";
+    break;
+  case LE:
+    result = "<=";
+    break;
+  case E:
+    result = "=";
+    break;
+  }
+  return result;
+}
+
+std::string convert_to_string(cond *conditions) {
+  if (conditions == nullptr)
+    return "";
+  else if (conditions->relation_type == AND) {
+    // visit the left edge and the right edge then join it.
+    std::string left = convert_to_string(conditions->left);
+    std::string right = convert_to_string(conditions->right);
+    return left + " AND " + right;
+  } else if (conditions->relation_type == OR) {
+    std::string left = convert_to_string(conditions->left);
+    std::string right = convert_to_string(conditions->right);
+    return left + " OR " + right;
+  }
+  return conditions->column_name + " " +
+         convert_to_string(conditions->relation_type) + " " +
+         std::to_string(conditions->number);
+}
 
 void get_to_table_in_catalog(std::fstream &file, std::string &table_name) {
   std::string line;
@@ -63,29 +112,14 @@ bool check_table(std::string &table_name) {
 
 // start of the writing the condition to the file
 
-void write_inorder(cond *condition, std::fstream &file) {
-  if (condition != nullptr) {
-    write_inorder(condition->left, file);
-    file << ":" << condition->relation_type << "," << condition->number;
-    write_inorder(condition->right, file);
-  }
-}
-void write_postorder(cond *condition, std::fstream &file) {
-  if (condition != nullptr) {
-    write_inorder(condition->left, file);
-    write_inorder(condition->right, file);
-    file << ":" << condition->relation_type << "," << condition->number;
-  }
-}
-
 void write_condition(cond *conditions, std::fstream &file) {
-  file << ":";
-  if (conditions == nullptr)
-    file << ":";
-  write_inorder(conditions, file);
-  file << "&";
-  write_postorder(conditions, file);
-  file << "\n";
+  if (conditions == nullptr) {
+    file << "#";
+    return;
+  }
+  file << ":" << conditions->relation_type << " " << conditions->number;
+  write_condition(conditions->left, file);
+  write_condition(conditions->right, file);
 }
 
 int raise_foreign_key(col_list *cols, reference_list *refer_list) {
@@ -110,6 +144,12 @@ int raise_foreign_key(col_list *cols, reference_list *refer_list) {
   return 1;
 }
 
+void add_reference_attr(reference_list *refer_list) {
+  std::unordered_map<std::string, std::unordered_set<std::string>> map;
+  for (reference *refer : *refer_list)
+    map[refer->table_name].insert(refer->referenced_attr);
+}
+
 int create_table(std::string &table_name, col_list *cols) {
   /* open the file in append mode , write the table_name into the file then the
      column_name
@@ -125,7 +165,7 @@ int create_table(std::string &table_name, col_list *cols) {
       4.line : the table and column where this attribute is used as a reference
      .
   */
-  std::fstream file(CATALOG_PATH, std::ios::ate);
+  std::fstream file(CATALOG_PATH, std::ios_base::app);
   if (!file)
     return 1;
   file << table_name << "\n";
@@ -133,7 +173,9 @@ int create_table(std::string &table_name, col_list *cols) {
     col temp = *column;
     file << ":" << temp.column_name << ":" << temp.type << ":" << temp.length
          << ":" << temp.primary_key << "\n";
+    file << ":";
     write_condition(temp.conditions, file);
+    file << "\n";
     file << "::" << temp.referencing_tab << "," << temp.referencing_col << "\n";
     file << "::\n";
   }
@@ -149,6 +191,7 @@ void makes_referenced_list(std::string &line, referenced_list &list) {
   /*
      takes the input string parses it and then returns the result in list
   */
+  std::cout << line << "\n";
   std::vector<std::string> raw_referenced_list = tokenize(line, ":");
   std::vector<std::string> temp;
 
@@ -159,47 +202,32 @@ void makes_referenced_list(std::string &line, referenced_list &list) {
   }
 }
 
-std::vector<cond *> make_cond_str_array(std::string &line) {
-  std::vector<std::string> raw_list_cond = tokenize(line, ":");
-  std::vector<std::string> temp;
-  std::vector<cond *> result;
-  for (std::string &raw_cond : raw_list_cond) {
-    temp = tokenize(raw_cond, ",");
-    cond *new_cond = new cond();
-    new_cond->relation_type = std::stoi(temp[0]);
-    new_cond->number = std::stoi(temp[1]);
-    result.push_back(new_cond);
+cond *get_condition(std::string &line, std::string &table_name) {
+  int16_t relation_type, number;
+  cond *node;
+  if (line[0] == '#') {
+    line = line.substr(1);
+    node = nullptr;
+  } else if (line[0] == ':') {
+    int position = 1;
+    std::string number_str;
+    while (std::isdigit(line[position]) or line[position] == '+' or
+           line[position] == '-')
+      number_str += line[position++];
+    relation_type = std::stoi(number_str);
+    number_str = "";
+    position++;
+    while (std::isdigit(line[position]) or line[position] == '+' or
+           line[position] == '-')
+      number_str += line[position++];
+    number = std::stoi(number_str);
+    line = line.substr(position);
+    std::cout << line << "\n";
+    node = new cond(relation_type, number, table_name);
+    node->left = get_condition(line, table_name);
+    node->right = get_condition(line, table_name);
   }
-  return result;
-}
-
-cond *buildtree(std::vector<cond *> &inorder, std::vector<cond *> &postorder,
-                int in_str, int in_end, std::unordered_map<cond *, int> &map,
-                int &index) {
-  if (in_str > in_end)
-    return nullptr;
-  cond *node = postorder[index];
-  index--;
-  if (in_str == in_end)
-    return node;
-  int mid_index = map[node];
-  node->right =
-      buildtree(inorder, postorder, mid_index + 1, in_end, map, index);
-  node->left = buildtree(inorder, postorder, in_str, mid_index - 1, map, index);
   return node;
-}
-
-cond *get_condition(std::string &line) {
-  std::vector<std::string> order = tokenize(line, "&");
-  if (order.size() < 2)
-    return nullptr;
-  std::vector<cond *> inorder = make_cond_str_array(order[0]);
-  std::vector<cond *> postorder = make_cond_str_array(order[1]);
-  std::unordered_map<cond *, int> map;
-  for (int i = 0; i < inorder.size(); i++)
-    map[inorder[i]] = i;
-  int endIndex = inorder.size() - 1;
-  return buildtree(inorder, postorder, 0, (int)inorder.size(), map, endIndex);
 }
 
 col_list *get_table(std::string &table_name) {
@@ -219,14 +247,13 @@ col_list *get_table(std::string &table_name) {
   // bool flag = check_table(table_name);
   // if (!flag)
   //  return nullptr;
-  std::cout << "inside get function\n";
   std::fstream file(CATALOG_PATH, std::ios::in);
   std::string line;
   char temp;
   get_to_table_in_catalog(file, table_name);
 
   col_list *cols = new col_list;
-  while (std::getline(file, line) and line[0] == ':') {
+  while (std::getline(file, line) && line[0] == ':') {
     // the line will contain the various info about the column
 
     col *new_column = new col();
@@ -239,35 +266,40 @@ col_list *get_table(std::string &table_name) {
     new_column->primary_key =
         std::stoi(properties[3]); // as the last character will contain new line
                                   // character which
-    // needs to be not taken in tokenize
-    file.get(temp);
+                                  // needs to be not taken in tokenize
+    std::cout << "after 1\n";
     file.get(temp);
     std::getline(file, line);
-    cond *node = get_condition(line);
-    new_column->conditions = node;
+    std::cout << line << "\n";
+
+    new_column->conditions = get_condition(line, new_column->column_name);
 
     // this is for the attribute which is referenced by the current
     // attribute
+    std::cout << "after 2\n";
     file.get(temp);
     file.get(temp);
     std::getline(file, line);
     properties = tokenize(line, ",");
     if (properties.size() == 2) {
-      new_column->referencing_tab = properties[1];
+      std::cout << "inside the properties\n";
+      new_column->referencing_tab = properties[0];
       new_column->referencing_col =
-          properties[2].substr(properties[2].length() - 1);
+          properties[1].substr(properties[1].length() - 1);
     }
     // this is for the attribute which are taking the refernece from this
     // attribute
+    std::cout << "outside the reference part\n";
     file.get(temp);
     file.get(temp);
     std::getline(file, line);
     referenced_list list;
-    makes_referenced_list(line, list);
+    if (!line.empty())
+      makes_referenced_list(line, list);
     new_column->referenced_list = list;
     cols->push_back(new_column);
+    std::cout << "end of while loop\n";
   }
-  std::cout << "the end get tables;\n";
   return cols;
 }
 
@@ -290,45 +322,6 @@ int raise_primary_key(col_list *cols,
     return 0;
   return 1;
 }
-std::string convert_to_string(int type) {
-  std::string result;
-  switch (type) {
-  case GE:
-    result = ">=";
-    break;
-  case GT:
-    result = ">";
-    break;
-  case LT:
-    result = "<";
-    break;
-  case LE:
-    result = "<=";
-    break;
-  case E:
-    result = "=";
-    break;
-  }
-  return result;
-}
-
-std::string convert_to_string(cond *conditions) {
-  if (conditions == nullptr)
-    return "";
-  else if (conditions->relation_type == AND) {
-    // visit the left edge and the right edge then join it.
-    std::string left = convert_to_string(conditions->left);
-    std::string right = convert_to_string(conditions->right);
-    return left + " AND " + right;
-  } else if (conditions->relation_type == OR) {
-    std::string left = convert_to_string(conditions->left);
-    std::string right = convert_to_string(conditions->right);
-    return left + " OR " + right;
-  }
-  return conditions->column_name + " " +
-         convert_to_string(conditions->relation_type) + " " +
-         std::to_string(conditions->number);
-}
 
 void display_table(col_list *cols) {
   std::cout << "\n";
@@ -338,7 +331,7 @@ void display_table(col_list *cols) {
   std::cout << "TYPE";
   std::cout.width(15);
   std::cout << "PRIMARY KEY";
-  std::cout.width(30);
+  std::cout.width(50);
   std::cout << "CONDITIONS";
   std::cout.width(15);
   std::cout << "FOREIGN KEY";
@@ -351,7 +344,7 @@ void display_table(col_list *cols) {
     std::cout << convert_to_string(column->type);
     std::cout.width(15);
     std::cout << column->primary_key;
-    std::cout.width(30);
+    std::cout.width(50);
     std::cout << convert_to_string(column->conditions);
     std::cout.width(15);
     if (column->referencing_tab != "")
