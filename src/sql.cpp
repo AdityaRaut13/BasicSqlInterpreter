@@ -131,9 +131,10 @@ void add_reference_attr(reference_list *refer_list, std::string &table_name) {
 
   */
   std::unordered_map<std::string, reference *> map;
-  for (reference *refer : *refer_list) {
+  for (reference *refer : *refer_list)
     map[refer->table_name] = refer;
-  }
+
+  std::ofstream buffer(BUFFER0);
   std::fstream file(CATALOG_PATH);
   std::string line;
   std::vector<std::string> temp;
