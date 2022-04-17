@@ -27,6 +27,7 @@
 %token OR AND
 %token GE GT LE LT E NE
 %token DESCRIBE
+%token DROP
 
 
 %token <string> IDENTIFIER;
@@ -55,6 +56,7 @@ statements:statement
 
 statement:create_stmt
          |describe_stmt
+         |drop_stmt 
          ;
 
 create_stmt:CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON
@@ -159,7 +161,17 @@ describe_stmt: DESCRIBE  IDENTIFIER SEMICOLON
                     yyerror("The Table Does not exists");
              }
              ;
+drop_stmt:DROP TABLE IDENTIFIER SEMICOLON
+         {
+                if(check_table(*$3)==true)
+                    {
+                        drop_table(*$3);
+                        std::cout<<"Table Dropped successfully\n";
+                    }
+                else
+                    yyerror("The Table Does not exists");
 
+         }
 
 
 

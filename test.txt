@@ -4,15 +4,17 @@ CREATE TABLE department
     departname CHAR(20),
     PRIMARY KEY (departno)
 );
-DESCRIBE department;
-CREATE TABLE student
-(
-    id INT(10) CHECK id > 0 AND id<100,
-    name CHAR(20),
-    departno INT(10),
-    PRIMARY KEY (id),
-    FOREIGN KEY (departno) REFERENCES department(departno)
+
+CREATE TABLE course
+(  
+    courseID INT(10),
+    coursename CHAR(20),
+    PRIMARY KEY (courseID)
 );
+DESCRIBE course;
+DESCRIBE department;
+DROP TABLE department;
+DESCRIBE course;
 
 
 

@@ -24,3 +24,4 @@ extern void display_table(col_list *cols);
 extern std::string convert_to_str(int type);
 extern std::string convert_to_str(cond *conditions);
 extern void add_reference_attr(reference_list *refer, std::string &table_name);
+extern void drop_table(std::string table_name);

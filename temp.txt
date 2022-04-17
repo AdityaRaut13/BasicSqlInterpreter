@@ -1,0 +1,18 @@
+
+CREATE TABLE course
+(  
+    courseID INT(10),
+    coursename CHAR(20),
+    PRIMARY KEY (courseID)
+);
+CREATE TABLE student
+(
+    id INT(10) CHECK id > 0 AND id<100,
+    name CHAR(20),
+    departno INT(10),
+    courseID INT(10),
+
+    PRIMARY KEY (id),
+    FOREIGN KEY (departno) REFERENCES department(departno),
+    FOREIGN KEY (courseID) REFERENCES course(courseID)
+);

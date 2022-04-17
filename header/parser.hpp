@@ -77,8 +77,9 @@ extern int yydebug;
     E = 278,                       /* E  */
     NE = 279,                      /* NE  */
     DESCRIBE = 280,                /* DESCRIBE  */
-    IDENTIFIER = 281,              /* IDENTIFIER  */
-    NUMBER = 282                   /* NUMBER  */
+    DROP = 281,                    /* DROP  */
+    IDENTIFIER = 282,              /* IDENTIFIER  */
+    NUMBER = 283                   /* NUMBER  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -98,7 +99,7 @@ union YYSTYPE
 	reference_list* refer_list;
 	cond* condition;
 
-#line 102 "header/parser.hpp"
+#line 103 "header/parser.hpp"
 
 };
 typedef union YYSTYPE YYSTYPE;

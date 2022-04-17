@@ -140,36 +140,55 @@ void add_reference_attr(reference_list *refer_list, std::string &table_name) {
   std::vector<std::string> temp;
   reference *refer;
   while (std::getline(file, line) and line[0] != ':') {
+    buffer << line << "\n";
     if (map.find(line) != map.end()) {
       refer = map[line];
       while (std::getline(file, line)) {
+        buffer << line << "\n";
         temp = tokenize(line, ":");
         if (temp[0].compare(refer->referenced_attr) == 0)
           break;
         std::getline(file, line);
+        buffer << line << "\n";
         std::getline(file, line);
+        buffer << line << "\n";
         std::getline(file, line);
+        buffer << line << "\n";
       }
       if (!line.empty()) {
+        // this is th column name .
         if (temp[3] == "0")
           fatal("The key is not a primary key");
+
         std::getline(file, line);
+        buffer << line << "\n";
+
         std::getline(file, line);
+        buffer << line << "\n";
+
         std::getline(file, line);
+        buffer << line;
+
         // file.seekg((int)file.tellg() - line.length() - 1, file.beg);
-        file.seekp((std::streamoff)file.tellg() - 1);
         std::string temp = table_name + "," + refer->referencing_attr + ":";
-        file.write(temp.c_str(), temp.length());
-        file.seekg((std::streamoff)file.tellp() + 1);
+        buffer << temp << "\n";
       }
       map.erase(refer->table_name);
+      // then insert the next columns in it.
+      while (std::getline(file, line) and line[0] == ':')
+        buffer << line << "\n";
+      file.seekg((int)file.tellg() - line.length() - 1, file.beg);
 
     } else {
       while (std::getline(file, line) and line[0] == ':')
-        ;
+        buffer << line << "\n";
       file.seekg((int)file.tellg() - line.length() - 1, file.beg);
     }
   }
+  buffer.close();
+  file.close();
+  std::remove(CATALOG_PATH);
+  std::rename(BUFFER0, CATALOG_PATH);
 }
 
 int raise_foreign_key(col_list *cols, reference_list *refer_list) {
@@ -195,10 +214,8 @@ int raise_foreign_key(col_list *cols, reference_list *refer_list) {
 }
 
 int create_table(std::string &table_name, col_list *cols) {
-  /* open the file in append mode , write the table_name into the file then the
-     column_name
-   file structure :
-     table_name
+  /* open the file in append mode , write the table_name into the file then
+   the column_name file structure : table_name
      :column_name:type:length:is_primary_key
      ::constraints conditions
      ::referencing_table_name,referencing_column_name
@@ -206,7 +223,8 @@ int create_table(std::string &table_name, col_list *cols) {
       1.line : general properties of columns
       2.line : the check constraints
       3.line : the table and column where this attribute is referencing .
-      4.line : the table and column where this attribute is used as a reference
+      4.line : the table and column where this attribute is used as a
+   reference
      .
   */
   std::fstream file(CATALOG_PATH, std::ios_base::app);
@@ -239,9 +257,11 @@ void makes_referenced_list(std::string &line, referenced_list &list) {
   std::vector<std::string> temp;
 
   for (std::string raw_referenced : raw_referenced_list) {
-    temp = tokenize(raw_referenced, ",");
-    referenced *new_referenced = new referenced(temp[0], temp[1]);
-    list.push_back(new_referenced);
+    if (!raw_referenced.empty()) {
+      temp = tokenize(raw_referenced, ",");
+      referenced *new_referenced = new referenced(temp[0], temp[1]);
+      list.push_back(new_referenced);
+    }
   }
 }
 
@@ -390,4 +410,38 @@ void display_table(col_list *cols) {
     std::cout << "\n";
   }
   std::cout << "\n";
+}
+
+void drop_table(std::string table_name) {
+
+  /*
+    The reference
+
+  */
+
+  std::ofstream buffer(BUFFER0);
+  std::fstream file(CATALOG_PATH);
+  std::string line;
+  while (std::getline(file, line) and line[0] != ':') {
+    if (line.compare(table_name) == 0) {
+      while (std::getline(file, line) and line[0] == ':') {
+        std::getline(file, line);
+        std::getline(file, line);
+        std::getline(file, line);
+      }
+
+    } else {
+      buffer << line << "\n";
+      while (std::getline(file, line) and line[0] == ':')
+        buffer << line << "\n";
+    }
+    file.seekg((int)file.tellg() - line.length() - 1, file.beg);
+  }
+  buffer.close();
+  file.close();
+  std::remove(CATALOG_PATH);
+  std::string path(PATH);
+  path += table_name;
+  std::remove(path.c_str());
+  std::rename(BUFFER0, CATALOG_PATH);
 }
