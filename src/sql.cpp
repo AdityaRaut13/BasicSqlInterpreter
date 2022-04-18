@@ -124,7 +124,6 @@ void write_condition(cond *conditions, std::fstream &file) {
   write_condition(conditions->right, file);
 }
 
-
 void add_reference_attr(reference_list *refer_list, std::string &table_name) {
 
   /*
@@ -191,56 +190,6 @@ void add_reference_attr(reference_list *refer_list, std::string &table_name) {
   std::remove(CATALOG_PATH);
   std::rename(BUFFER0, CATALOG_PATH);
 }
-||||||| 541a392
-void add_reference_attr(reference_list *refer_list, std::string &table_name) {
-
-  /*
-    The reference
-
-  */
-  std::unordered_map<std::string, reference *> map;
-  for (reference *refer : *refer_list) {
-    map[refer->table_name] = refer;
-  }
-  std::fstream file(CATALOG_PATH);
-  std::string line;
-  std::vector<std::string> temp;
-  reference *refer;
-  while (std::getline(file, line) and line[0] != ':') {
-    if (map.find(line) != map.end()) {
-      refer = map[line];
-      while (std::getline(file, line)) {
-        temp = tokenize(line, ":");
-        if (temp[0].compare(refer->referenced_attr) == 0)
-          break;
-        std::getline(file, line);
-        std::getline(file, line);
-        std::getline(file, line);
-      }
-      if (!line.empty()) {
-        if (temp[3] == "0")
-          fatal("The key is not a primary key");
-        std::getline(file, line);
-        std::getline(file, line);
-        std::getline(file, line);
-        // file.seekg((int)file.tellg() - line.length() - 1, file.beg);
-        file.seekp((std::streamoff)file.tellg() - 1);
-        std::string temp = table_name + "," + refer->referencing_attr + ":";
-        file.write(temp.c_str(), temp.length());
-        file.seekg((std::streamoff)file.tellp() + 1);
-      }
-      map.erase(refer->table_name);
-
-    } else {
-      while (std::getline(file, line) and line[0] == ':')
-        ;
-      file.seekg((int)file.tellg() - line.length() - 1, file.beg);
-    }
-  }
-}
-=======
-void add_reference_attr(reference_list *refer_list, std::string &table_name) {}
->>>>>>> master
 
 int raise_foreign_key(col_list *cols, reference_list *refer_list) {
   /*
