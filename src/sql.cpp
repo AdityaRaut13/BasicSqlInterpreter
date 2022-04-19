@@ -75,11 +75,12 @@ std::string convert_to_string(cond *conditions) {
 void get_to_table_in_catalog(std::fstream &file, std::string &table_name) {
   std::string line;
   // compare each line with the table name
-  while (std::getline(file, line) and line.compare(table_name) != 0) {
+  std::getline(file, line);
+  while ( !line.empty() and line.compare(table_name) != 0 ) {
     // skipping the column of the current table
+     std::cout<<line<<"\n";
     while (std::getline(file, line) and line[0] == ':')
       ;
-    file.seekg((int)file.tellg() - line.length() - 1, file.beg);
   }
 }
 
