@@ -12,9 +12,6 @@ CREATE TABLE course
     PRIMARY KEY (courseID)
 );
 DESCRIBE course;
-DESCRIBE department;
-DROP TABLE department;
-DESCRIBE course;
 
 
 

@@ -18,6 +18,8 @@
 	reference* refer;
 	reference_list* refer_list;
 	cond* condition;
+	values_list* values_list;
+	Values* values;
 }
 
 
@@ -32,6 +34,9 @@
 %token STRING 
 
 
+%token INSERT INTO VALUES
+%token STRING
+
 %token <string> IDENTIFIER STRING;
 %token <ival> NUMBER;
 
@@ -45,7 +50,8 @@
 %type <refer_list> foreign_keys
 %type <condition> expr or_expr and_expr
 %type <condition> condition
-
+%type <values_list> list_values
+%type<values> list_value
 %start statements
 
 
@@ -184,21 +190,43 @@ drop_stmt:DROP TABLE IDENTIFIER SEMICOLON
 
 
  /* need to create the insert statement*/
-insert_stmt:INSERT INTO IDENTIFIER VALUES OPEN_PAR list_values CLOSE_PAR SEMICOLON
-           {
-
-           }
-           ;
-list_values: list_value
-           | list_values COMMA list_value
-           ;
-list_value: NUMBER
-          | FLOAT
-          | STRING
-          ;
 
 
+insert_stmt:INSERT INTO IDENTIFIER VALUES list_values SEMICOLON {
+				if(check_table(*$3)==true)
+                {
+                        insert_into_table(*$3,$5);
+                        std::cout<<"Inserted successfully\n";
+                }
+                else
+                    yyerror("The Table Does not exists");
+>>>>>>> origin/new_approach_cond
 
+			}
+			;
+
+
+list_values:list_value {
+				$$=new values_list();
+				$$->push_back($1);
+			}
+			| list_values COMMA list_value
+			{
+				$1->push_back($3);
+			}
+			;
+list_value: NUMBER {
+				$$=new Values(std::to_string($1),NUMBER);
+			}
+			|DECIMAL
+			{
+				$$=new Values(std::to_string($1),DECIMAL);
+			}
+			|STRING
+			{
+				$$=new Values(std::to_string($1),CHAR);
+			}
+			;
 
 %%
 

@@ -41,6 +41,7 @@ VALUES return VALUES;
 "<=" return LE;
 "=" return E;
 "!=" return NE;
+
 [a-zA-Z_][a-zA-Z0-9_]+ {
 	yylval.string=new std::string(yytext);
 	return IDENTIFIER;
@@ -52,6 +53,11 @@ VALUES return VALUES;
         return STRING;
     } 
 [ \t\n]+ {}
+"'[^'\n]'" { 
+	std::string *val=new std::string(yytext);
+	yylval.string=val;
+	return STRING;
+}
 
 . { }
 
