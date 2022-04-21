@@ -1394,16 +1394,19 @@ yyreduce:
 #line 165 "sql.y"
          {
                 if(check_table(*(yyvsp[-1].string))==true)
-                    drop_table(*(yyvsp[-1].string));
+                    {
+                        drop_table(*(yyvsp[-1].string));
+                        std::cout<<"Table Dropped successfully\n";
+                    }
                 else
                     yyerror("The Table Does not exists");
 
          }
-#line 1403 "src/parser.cpp"
+#line 1406 "src/parser.cpp"
     break;
 
 
-#line 1407 "src/parser.cpp"
+#line 1410 "src/parser.cpp"
 
       default: break;
     }
@@ -1597,7 +1600,7 @@ yyreturn:
   return yyresult;
 }
 
-#line 184 "sql.y"
+#line 187 "sql.y"
 
 
 

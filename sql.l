@@ -23,6 +23,9 @@ DESCRIBE return DESCRIBE;
 AND return AND;
 OR return OR;
 DROP return DROP;
+INSERT return INSERT;
+INTO return INTO;
+VALUES return VALUES;
 [-+]?[0-9]+ {   yylval.ival=atoi(yytext);  return NUMBER; }
 
   /*[1-9][0-9]+\.[0-9]+([eE][+-]?[0-9]+)? { yylval.fval=atof(yytext); return FLOAT; }
@@ -42,6 +45,12 @@ DROP return DROP;
 	yylval.string=new std::string(yytext);
 	return IDENTIFIER;
 	}
+"'[^'\n]+'" {
+        std::string str= new std::string(yytext);
+        str=str.substr(1,str->length()-2);
+        yylval.string=str;
+        return STRING;
+    } 
 [ \t\n]+ {}
 
 . { }

@@ -28,9 +28,11 @@
 %token GE GT LE LT E NE
 %token DESCRIBE
 %token DROP
+%token INSERT INTO VALUES
+%token STRING 
 
 
-%token <string> IDENTIFIER;
+%token <string> IDENTIFIER STRING;
 %token <ival> NUMBER;
 
 %type <string_array> primary_key
@@ -57,6 +59,7 @@ statements:statement
 statement:create_stmt
          |describe_stmt
          |drop_stmt 
+         | insert_stmt
          ;
 
 create_stmt:CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON
@@ -181,6 +184,19 @@ drop_stmt:DROP TABLE IDENTIFIER SEMICOLON
 
 
  /* need to create the insert statement*/
+insert_stmt:INSERT INTO IDENTIFIER VALUES OPEN_PAR list_values CLOSE_PAR SEMICOLON
+           {
+
+           }
+           ;
+list_values: list_value
+           | list_values COMMA list_value
+           ;
+list_value: NUMBER
+          | FLOAT
+          | STRING
+          ;
+
 
 
 
