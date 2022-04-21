@@ -14,6 +14,8 @@ public:
   cond(int16_t rel, int16_t number, std::string col)
       : relation_type(rel), number(number), column_name(col), left(nullptr),
         right(nullptr) {}
+  bool apply(int number);
+  bool apply(float number);
 };
 
 class referenced {
@@ -53,7 +55,19 @@ public:
         primary_key(false) {}
 };
 
+class Values
+{
+  public:
+  std::string data;
+  int type;
+  Values(std::string data,int type):data(data),type(type){}
+  Values():data(""),type(-1){}
+}
+
+
+
 typedef std::vector<cond *> cond_list;
 typedef std::vector<col *> col_list;
 typedef std::vector<referenced *> referenced_list;
 typedef std::vector<reference *> reference_list;
+typedef std::vector<Values*> values_list;

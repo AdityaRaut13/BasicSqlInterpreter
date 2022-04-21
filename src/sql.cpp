@@ -446,3 +446,48 @@ void drop_table(std::string table_name) {
   std::remove(path.c_str());
   std::rename(BUFFER0, CATALOG_PATH);
 }
+
+bool check_column_insertion(col* column,Values* val)
+{
+  if(column->type!=val->type or column->length<val->data.length() )
+    return false;
+  switch(val->type)
+  {
+    case NUMBER:
+    
+      int number=std::stoi(val->data);
+      if(!column->conditions->apply(number))return false;
+    
+    case DECIMAL:
+      float number=std::stoi(val->data);
+      if(!column->conditions->apply(number))return false;
+    default:
+      return true;
+  }
+  return true;
+}
+
+bool check_primary_key(std::string table_name,Values * val,int index )
+{
+  std::ifstream file(PATH+table_name);
+  
+}
+
+void insert_into_table(std::string table_name,values_list*list)
+{
+  std::string line;
+  //std::fstream table(PATH+table_name,std::ios_base::app || std::ios_base::in);
+  col_list*cols=get_table(table_name);
+  for(int i=0;i<cols.size();i++)
+  {
+    if(check_column_insertion(cols[i],list[i])==true)
+    {
+      // the condition is satified in this case.
+      // need to check for the primary_key_constraint
+      // 
+      if(cols[i]->primary_key ) check_primary_key(table_name,list[i],i);
+      continue;
+    }
+    fatal("The Insertion failed ");
+  }
+}
