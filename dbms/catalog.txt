@@ -1,3 +1,12 @@
+department
+:departno:266:10:1
+:#
+::,
+::
+:departname:265:20:0
+:#
+::,
+::
 course
 :courseID:266:10:1
 :#

@@ -2,7 +2,6 @@
 	#include <iostream>
 	#include <string>
 	#include <vector>
-    #include <bits/stdc++.h>
 	#include "node.h"
     #include "sql.h"
 	extern int yylex();
@@ -19,9 +18,8 @@
 	reference* refer;
 	reference_list* refer_list;
 	cond* condition;
-	values_list* literals_list;
-	Values* literal;
-    float fval;
+	values_list* values_list;
+	Values* values;
 }
 
 
@@ -32,13 +30,19 @@
 %token GE GT LE LT E NE
 %token DESCRIBE
 %token DROP
+<<<<<<< HEAD
 %token INSERT INTO VALUES
+%token STRING 
 
+||||||| 4172551
 
+=======
+%token INSERT INTO VALUES
+%token STRING
+>>>>>>> origin/new_approach_cond
 
-%token <string> IDENTIFIER STRING
-%token <ival>  NUMBER;
-%token <fval> FLOAT;
+%token <string> IDENTIFIER STRING;
+%token <ival> NUMBER;
 
 %type <string_array> primary_key
 %type <string_array> columns
@@ -50,8 +54,8 @@
 %type <refer_list> foreign_keys
 %type <condition> expr or_expr and_expr
 %type <condition> condition
-%type <literals_list> list_values
-%type<literal> list_value
+%type <values_list> list_values
+%type<values> list_value
 %start statements
 
 
@@ -190,8 +194,22 @@ drop_stmt:DROP TABLE IDENTIFIER SEMICOLON
 
 
  /* need to create the insert statement*/
+<<<<<<< HEAD
+insert_stmt:INSERT INTO IDENTIFIER VALUES OPEN_PAR list_values CLOSE_PAR SEMICOLON
+           {
 
+           }
+           ;
+list_values: list_value
+           | list_values COMMA list_value
+           ;
+list_value: NUMBER
+          | FLOAT
+          | STRING
+          ;
 
+||||||| 4172551
+=======
 insert_stmt:INSERT INTO IDENTIFIER VALUES list_values SEMICOLON {
 				if(check_table(*$3)==true)
                 {
@@ -200,6 +218,7 @@ insert_stmt:INSERT INTO IDENTIFIER VALUES list_values SEMICOLON {
                 }
                 else
                     yyerror("The Table Does not exists");
+>>>>>>> origin/new_approach_cond
 
 			}
 			;
@@ -217,13 +236,13 @@ list_values:list_value {
 list_value: NUMBER {
 				$$=new Values(std::to_string($1),NUMBER);
 			}
-			|FLOAT
+			|DECIMAL
 			{
 				$$=new Values(std::to_string($1),DECIMAL);
 			}
 			|STRING
 			{
-				$$=new Values(*$1,CHAR);
+				$$=new Values(std::to_string($1),CHAR);
 			}
 			;
 

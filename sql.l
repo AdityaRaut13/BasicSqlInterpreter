@@ -28,8 +28,8 @@ INTO return INTO;
 VALUES return VALUES;
 [-+]?[0-9]+ {   yylval.ival=atoi(yytext);  return NUMBER; }
 
-  /*[1-9][0-9]+\.[0-9]+([eE][+-]?[0-9]+)? { yylval.fval=atof(yytext); return FLOAT; }
-	*/
+[1-9][0-9]+\.[0-9]+([eE][+-]?[0-9]+)? { yylval.fval=atof(yytext); return FLOAT; }
+	
 
 \( return OPEN_PAR;
 \) return CLOSE_PAR;
@@ -47,17 +47,15 @@ VALUES return VALUES;
 	return IDENTIFIER;
 	}
 "'[^'\n]+'" {
-        std::string str= new std::string(yytext);
-        str=str.substr(1,str->length()-2);
-        yylval.string=str;
+        std::string result;
+        int length=strlen(yytext);
+        int i=1;
+        while(i<length-1)
+            result+=yytext[i++];
+        yylval.string=new std::string(result);
         return STRING;
     } 
 [ \t\n]+ {}
-"'[^'\n]'" { 
-	std::string *val=new std::string(yytext);
-	yylval.string=val;
-	return STRING;
-}
 
 . { }
 

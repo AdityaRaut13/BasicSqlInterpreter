@@ -76,9 +76,9 @@ void get_to_table_in_catalog(std::fstream &file, std::string &table_name) {
   std::string line;
   // compare each line with the table name
   std::getline(file, line);
-  while ( !line.empty() and line.compare(table_name) != 0 ) {
+  while (!line.empty() and line.compare(table_name) != 0) {
     // skipping the column of the current table
-     std::cout<<line<<"\n";
+    std::cout << line << "\n";
     while (std::getline(file, line) and line[0] == ':')
       ;
   }
@@ -447,47 +447,75 @@ void drop_table(std::string table_name) {
   std::rename(BUFFER0, CATALOG_PATH);
 }
 
-bool check_column_insertion(col* column,Values* val)
-{
-  if(column->type!=val->type or column->length<val->data.length() )
+bool check_column_insertion(col *column, Values *val) {
+  if (column->type != val->type or column->length < val->data.length())
     return false;
-  switch(val->type)
-  {
-    case NUMBER:
-    
-      int number=std::stoi(val->data);
-      if(!column->conditions->apply(number))return false;
-    
-    case DECIMAL:
-      float number=std::stoi(val->data);
-      if(!column->conditions->apply(number))return false;
-    default:
-      return true;
+  switch (val->type) {
+  case NUMBER: {
+    int number = std::stoi(val->data);
+    if (!column->conditions->apply(number))
+      return false;
+    break;
+  }
+
+  case FLOAT: {
+    float number = std::stoi(val->data);
+    if (!column->conditions->apply(number))
+      return false;
+  }
+  default:
+    return true;
   }
   return true;
 }
 
-bool check_primary_key(std::string table_name,Values * val,int index )
-{
-  std::ifstream file(PATH+table_name);
-  
+bool check_primary_key(std::string table_name, Values *val, int index) {
+  std::ifstream file(PATH + table_name);
+  std::string line;
+  while (std::getline(file, line)) {
+    std::vector<std::string> attr = tokenize(line, "#");
+    if (attr[index] == val->data) {
+      file.close();
+      return true;
+    }
+  }
+  file.close();
+  return false;
 }
 
-void insert_into_table(std::string table_name,values_list*list)
-{
+/*
+
+    the  format will  be something like :
+        attr_value#att_value#.. attr_value#
+        attr_value#att_value#.. attr_value# -----> one entry
+*/
+
+void insert_into_table(std::string table_name, values_list *list) {
   std::string line;
-  //std::fstream table(PATH+table_name,std::ios_base::app || std::ios_base::in);
-  col_list*cols=get_table(table_name);
-  for(int i=0;i<cols.size();i++)
-  {
-    if(check_column_insertion(cols[i],list[i])==true)
-    {
+  col_list *cols = get_table(table_name);
+  std::fstream file(PATH + table_name, std::ios_base::in | std::ios_base::app);
+  for (int i = 0; i < cols->size(); i++) {
+    if (check_column_insertion(cols->at(i), list->at(i)) == true) {
       // the condition is satified in this case.
       // need to check for the primary_key_constraint
-      // 
-      if(cols[i]->primary_key ) check_primary_key(table_name,list[i],i);
+      // need to check for the foreign key constraints
+      if (cols->at(i)->primary_key) {
+        file.close();
+        bool is_present = check_primary_key(table_name, list->at(i), i);
+        if (is_present)
+          fatal("The key is already present\n");
+        file.open(PATH + table_name, std::ios_base::in | std::ios_base::app);
+      }
+      if (!cols->at(i)->referencing_tab.empty()) {
+        // this is referencing some table in the table
+        // i need to check whether this data is present in the referenecing
+        // table
+      }
+      file << list->at(i)->data << "#";
       continue;
     }
     fatal("The Insertion failed ");
   }
+  file << "\n";
+  file.close();
 }
