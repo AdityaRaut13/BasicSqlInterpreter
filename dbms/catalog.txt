@@ -1,18 +1,22 @@
 department
 :departno:266:10:1
-:#
+::273 -1:275 1##:277 100##
 ::,
-::
+::student,departno:
 :departname:265:20:0
 :#
 ::,
 ::
-course
-:courseID:266:10:1
+student
+:id:266:10:1
+::273 -1:275 0##:277 100##
+::,
+::
+:name:265:20:0
 :#
 ::,
 ::
-:coursename:265:20:0
+:departno:266:10:0
 :#
-::,
+::department,departno
 ::

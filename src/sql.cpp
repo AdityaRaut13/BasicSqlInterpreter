@@ -78,7 +78,6 @@ void get_to_table_in_catalog(std::fstream &file, std::string &table_name) {
   std::getline(file, line);
   while (!line.empty() and line.compare(table_name) != 0) {
     // skipping the column of the current table
-    std::cout << line << "\n";
     while (std::getline(file, line) and line[0] == ':')
       ;
   }
@@ -341,10 +340,9 @@ col_list *get_table(std::string &table_name) {
     file.get(temp);
     std::getline(file, line);
     properties = tokenize(line, ",");
-    if (properties.size() == 2) {
+    if (properties.size() >= 2) {
       new_column->referencing_tab = properties[0];
-      new_column->referencing_col =
-          properties[1].substr(properties[1].length() - 1);
+      new_column->referencing_col = properties[1];
     }
     // this is for the attribute which are taking the refernece from this
     // attribute
@@ -448,19 +446,20 @@ void drop_table(std::string table_name) {
 }
 
 bool check_column_insertion(col *column, Values *val) {
+
   if (column->type != val->type or column->length < val->data.length())
     return false;
   switch (val->type) {
-  case NUMBER: {
+  case INT: {
     int number = std::stoi(val->data);
-    if (!column->conditions->apply(number))
+    if (column->conditions and !column->conditions->apply(number))
       return false;
     break;
   }
 
-  case FLOAT: {
+  case DECIMAL: {
     float number = std::stoi(val->data);
-    if (!column->conditions->apply(number))
+    if (column->conditions and !column->conditions->apply(number))
       return false;
   }
   default:
@@ -474,7 +473,31 @@ bool check_primary_key(std::string table_name, Values *val, int index) {
   std::string line;
   while (std::getline(file, line)) {
     std::vector<std::string> attr = tokenize(line, "#");
-    if (attr[index] == val->data) {
+    if (index < attr.size() and attr[index] == val->data) {
+      file.close();
+      return true;
+    }
+  }
+  file.close();
+  return false;
+}
+bool check_foreign_key(std::string &table_name, std::string &column_name,
+                       Values *val) {
+  col_list *cols = get_table(table_name);
+  int index = 0;
+  for (col *column : *cols) {
+    if (column->column_name == column_name)
+      break;
+    index++;
+  }
+  for (int i = 0; i < cols->size(); i++)
+    delete cols->at(i);
+  delete cols;
+  std::ifstream file(PATH + table_name);
+  std::string line;
+  while (std::getline(file, line)) {
+    std::vector<std::string> tokens = tokenize(line, "#");
+    if (tokens[index] == val->data) {
       file.close();
       return true;
     }
@@ -495,6 +518,7 @@ void insert_into_table(std::string table_name, values_list *list) {
   col_list *cols = get_table(table_name);
   std::fstream file(PATH + table_name, std::ios_base::in | std::ios_base::app);
   for (int i = 0; i < cols->size(); i++) {
+    // std::cout << i << "." << cols->at(i)->column_name << "\n";
     if (check_column_insertion(cols->at(i), list->at(i)) == true) {
       // the condition is satified in this case.
       // need to check for the primary_key_constraint
@@ -510,12 +534,21 @@ void insert_into_table(std::string table_name, values_list *list) {
         // this is referencing some table in the table
         // i need to check whether this data is present in the referenecing
         // table
+        bool foreign_key_present =
+            check_foreign_key(cols->at(i)->referencing_tab,
+                              cols->at(i)->referencing_col, list->at(i));
+        if (!foreign_key_present)
+          fatal("The foreign does not exist\n");
       }
       file << list->at(i)->data << "#";
       continue;
     }
     fatal("The Insertion failed ");
   }
+  for (int i = 0; i < cols->size(); i++)
+    delete cols->at(i);
+  delete cols;
+
   file << "\n";
   file.close();
 }

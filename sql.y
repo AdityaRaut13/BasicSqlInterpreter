@@ -77,6 +77,14 @@ create_stmt:CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA
             raise_foreign_key($5,$9);
             raise_primary_key($5,$7);
             create_table(*$3,$5);
+
+            // this is for deleting stuff
+            for(col* column : *$5)
+                delete column;
+            delete $5;
+            delete $7;
+            delete $9;
+
             
 	}
     | CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key CLOSE_PAR SEMICOLON
@@ -165,6 +173,10 @@ describe_stmt: DESCRIBE  IDENTIFIER SEMICOLON
                 {
                     col_list* cols=get_table(*$2);
                     display_table(cols);
+                    for(col* column : *cols)
+                        delete column;
+                    delete cols;
+                    
                 }
                 else
                     yyerror("The Table Does not exists");
@@ -192,10 +204,10 @@ drop_stmt:DROP TABLE IDENTIFIER SEMICOLON
  /* need to create the insert statement*/
 
 
-insert_stmt:INSERT INTO IDENTIFIER VALUES list_values SEMICOLON {
+insert_stmt:INSERT INTO IDENTIFIER VALUES OPEN_PAR list_values CLOSE_PAR SEMICOLON {
 				if(check_table(*$3)==true)
                 {
-                        insert_into_table(*$3,$5);
+                        insert_into_table(*$3,$6);
                         std::cout<<"Inserted successfully\n";
                 }
                 else
@@ -212,10 +224,11 @@ list_values:list_value {
 			| list_values COMMA list_value
 			{
 				$1->push_back($3);
+                $$=$1;
 			}
 			;
 list_value: NUMBER {
-				$$=new Values(std::to_string($1),NUMBER);
+				$$=new Values(std::to_string($1),INT);
 			}
 			|FLOAT
 			{
@@ -226,6 +239,15 @@ list_value: NUMBER {
 				$$=new Values(*$1,CHAR);
 			}
 			;
+
+
+
+    /* 
+        need to implement select statement
+    */
+
+
+
 
 %%
 

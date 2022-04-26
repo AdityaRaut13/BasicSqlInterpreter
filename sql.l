@@ -46,7 +46,7 @@ VALUES return VALUES;
 	yylval.string=new std::string(yytext);
 	return IDENTIFIER;
 	}
-"'[^'\n]+'" {
+[']([^'\n])+['] {
         std::string result;
         int length=strlen(yytext);
         int i=1;

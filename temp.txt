@@ -14,5 +14,13 @@ CREATE TABLE student
 
     PRIMARY KEY (id),
     FOREIGN KEY (departno) REFERENCES department(departno),
-    FOREIGN KEY (courseID) REFERENCES course(courseID)
 );
+CREATE TABLE course
+(  
+    courseID INT(10),
+    coursename CHAR(20),
+    PRIMARY KEY (courseID)
+);
+INSERT INTO department VALUES (2,'Marketing');  
+INSERT INTO department VALUES (3,'Sales');  
+INSERT INTO department VALUES (4,'Accountant');  
