@@ -1,4 +1,4 @@
-/* A Bison parser, made by GNU Bison 3.7.6.  */
+/* A Bison parser, made by GNU Bison 3.8.2.  */
 
 /* Bison interface for Yacc-like parsers in C
 
@@ -81,10 +81,13 @@ extern int yydebug;
     INSERT = 282,                  /* INSERT  */
     INTO = 283,                    /* INTO  */
     VALUES = 284,                  /* VALUES  */
-    IDENTIFIER = 285,              /* IDENTIFIER  */
-    STRING = 286,                  /* STRING  */
-    NUMBER = 287,                  /* NUMBER  */
-    FLOAT = 288                    /* FLOAT  */
+    DELETE = 285,                  /* DELETE  */
+    FROM = 286,                    /* FROM  */
+    WHERE = 287,                   /* WHERE  */
+    IDENTIFIER = 288,              /* IDENTIFIER  */
+    STRING = 289,                  /* STRING  */
+    NUMBER = 290,                  /* NUMBER  */
+    FLOAT = 291                    /* FLOAT  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -105,9 +108,10 @@ union YYSTYPE
 	cond* condition;
 	values_list* literals_list;
 	Values* literal;
+    select_cond* scond;
     float fval;
 
-#line 111 "header/parser.hpp"
+#line 115 "header/parser.hpp"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -118,6 +122,8 @@ typedef union YYSTYPE YYSTYPE;
 
 extern YYSTYPE yylval;
 
+
 int yyparse (void);
+
 
 #endif /* !YY_YY_HEADER_PARSER_HPP_INCLUDED  */

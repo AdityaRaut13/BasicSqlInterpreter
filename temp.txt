@@ -24,3 +24,7 @@ CREATE TABLE course
 INSERT INTO department VALUES (2,'Marketing');  
 INSERT INTO department VALUES (3,'Sales');  
 INSERT INTO department VALUES (4,'Accountant');  
+INSERT INTO student VALUES (1,'Aditya',11);
+INSERT INTO student VALUES (2,'Rushikesh',12);
+INSERT INTO student VALUES (3,'Tejal',12);
+INSERT INTO student VALUES (4,'Default',15);

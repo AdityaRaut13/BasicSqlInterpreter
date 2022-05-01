@@ -18,11 +18,10 @@ INSERT INTO department VALUES (12,'ENTC');
 INSERT INTO department VALUES (13,'Instru');  
 INSERT INTO department VALUES (14,'Mech');  
 
+DELETE FROM department WHERE departname='Mech';
 
-INSERT INTO student VALUES (1,'Aditya',11);
-INSERT INTO student VALUES (2,'Rushikesh',12);
-INSERT INTO student VALUES (3,'Tejal',12);
-INSERT INTO student VALUES (4,'Default',15);
+
+
 
 
 

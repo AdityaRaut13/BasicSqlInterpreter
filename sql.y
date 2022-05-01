@@ -21,6 +21,7 @@
 	cond* condition;
 	values_list* literals_list;
 	Values* literal;
+    select_cond* scond;
     float fval;
 }
 
@@ -33,6 +34,7 @@
 %token DESCRIBE
 %token DROP
 %token INSERT INTO VALUES
+%token DELETE FROM WHERE
 
 
 
@@ -52,6 +54,10 @@
 %type <condition> condition
 %type <literals_list> list_values
 %type<literal> list_value
+%type<scond> sexpr
+%type<scond> sor_expr;
+%type<scond> sand_expr;
+%type<scond> scond_b;
 %start statements
 
 
@@ -66,6 +72,7 @@ statement:create_stmt
          |describe_stmt
          |drop_stmt 
          | insert_stmt
+         | delete_stmt
          ;
 
 create_stmt:CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON
@@ -242,6 +249,212 @@ list_value: NUMBER {
 
 
 
+    /*
+        Delete conditons
+    */
+delete_stmt:DELETE FROM IDENTIFIER WHERE sexpr SEMICOLON
+           {
+				if(check_table(*$3)==true)
+                {
+                        delete_from_table(*$3,$5);
+                        std::cout<<"Deleted successfully\n";
+                }
+                else
+                    yyerror("The Table Does not exists");
+           }
+           ;
+
+sexpr:sor_expr{$$=$1;}
+sor_expr:sand_expr {  $$=$1; }
+        | sor_expr OR sand_expr {
+         $$=new select_cond();
+         $$->left=$1;
+         $$->right=$3;
+         $$->relation_type=OR;
+        } 
+        ;
+sand_expr:sand_expr AND scond_b
+        {  
+            $$=new select_cond();
+            $$->left =$1;
+            $$->right=$3;
+            $$->relation_type=AND;
+        }
+        | scond_b
+        {
+            $$=$1;
+        }
+        ;
+scond_b: IDENTIFIER GE NUMBER{
+            Values lv;
+            lv.data=std::to_string($3);
+            lv.type=INT;
+            $$=new select_cond(*$1,GE,lv);
+
+        }
+        |IDENTIFIER GT NUMBER{
+            Values lv;
+            lv.data=std::to_string($3);
+            lv.type=INT;
+            $$=new select_cond(*$1,GT,lv);
+
+        }
+        |IDENTIFIER NE NUMBER{
+            Values lv;
+            lv.data=std::to_string($3);
+            lv.type=INT;
+            $$=new select_cond(*$1,NE,lv);
+        
+        }
+        |IDENTIFIER LT NUMBER{
+            Values lv;
+            lv.data=std::to_string($3);
+            lv.type=INT;
+            $$=new select_cond(*$1,LT,lv);
+        }
+        |IDENTIFIER LE NUMBER{
+            Values lv;
+            lv.data=std::to_string($3);
+            lv.type=INT;
+            $$=new select_cond(*$1,LE,lv);
+        }
+        |IDENTIFIER E NUMBER
+        {
+            Values lv;
+            lv.data=std::to_string($3);
+            lv.type=INT;
+            $$=new select_cond(*$1,E,lv);
+        }
+        |IDENTIFIER GE FLOAT
+        {
+            Values lv;
+            lv.data=std::to_string($3);
+            lv.type=DECIMAL;
+            $$=new select_cond(*$1,GE,lv);
+        }
+        |IDENTIFIER GT FLOAT
+        {
+            Values lv;
+            lv.data=std::to_string($3);
+            lv.type=DECIMAL;
+            $$=new select_cond(*$1,GT,lv);
+        }
+        |IDENTIFIER NE FLOAT
+        {
+            Values lv;
+            lv.data=std::to_string($3);
+            lv.type=DECIMAL;
+            $$=new select_cond(*$1,NE,lv);
+        }
+        |IDENTIFIER LT FLOAT
+        {
+            Values lv;
+            lv.data=std::to_string($3);
+            lv.type=DECIMAL;
+            $$=new select_cond(*$1,LT,lv);
+        }
+        |IDENTIFIER LE FLOAT
+        {
+            Values lv;
+            lv.data=std::to_string($3);
+            lv.type=DECIMAL;
+            $$=new select_cond(*$1,LE,lv);
+        }
+        |IDENTIFIER E  FLOAT     
+        {
+            Values lv;
+            lv.data=std::to_string($3);
+            lv.type=DECIMAL;
+            $$=new select_cond(*$1,E,lv);
+        }
+        |IDENTIFIER GE STRING
+        {
+            Values lv;
+            lv.data=*$3;
+            lv.type=CHAR;
+            $$=new select_cond(*$1,E,lv);
+        }
+        |IDENTIFIER GT STRING
+        {
+            Values lv;
+            lv.data=*$3;
+            lv.type=CHAR;
+            $$=new select_cond(*$1,GT,lv);
+        }
+        |IDENTIFIER NE STRING
+        {
+            Values lv;
+            lv.data=*($3);
+            lv.type=CHAR;
+            $$=new select_cond(*$1,NE,lv);
+        }
+        |IDENTIFIER LT STRING
+        {
+            Values lv;
+            lv.data=*$3;
+            lv.type=CHAR;
+            $$=new select_cond(*$1,LT,lv);
+        }
+        |IDENTIFIER LE STRING
+        {
+            Values lv;
+            lv.data=*$3;
+            lv.type=CHAR;
+            $$=new select_cond(*$1,LE,lv);
+        }
+        |IDENTIFIER E STRING
+        {
+            Values lv;
+            lv.data=*($3);
+            lv.type=CHAR;
+            $$=new select_cond(*$1,E,lv);
+        }
+        |IDENTIFIER GE IDENTIFIER
+        {
+            Values lv;
+            lv.data=*($3);
+            lv.type=IDENTIFIER;
+            $$=new select_cond(*$1,GE,lv);
+        }
+        |IDENTIFIER GT IDENTIFIER
+        {
+            Values lv;
+            lv.data=*($3);
+            lv.type=IDENTIFIER;
+            $$=new select_cond(*$1,GT,lv);
+        }
+        |IDENTIFIER NE IDENTIFIER
+        {
+            Values lv;
+            lv.data=*($3);
+            lv.type=IDENTIFIER;
+            $$=new select_cond(*$1,NE,lv);
+        }
+        |IDENTIFIER LT IDENTIFIER
+        {
+            Values lv;
+            lv.data=*($3);
+            lv.type=IDENTIFIER;
+            $$=new select_cond(*$1,LT,lv);
+        }
+        |IDENTIFIER LE IDENTIFIER
+        {
+            Values lv;
+            lv.data=*($3);
+            lv.type=IDENTIFIER;
+            $$=new select_cond(*$1,LE,lv);
+        }
+        |IDENTIFIER E IDENTIFIER
+        {
+            Values lv;
+            lv.data=*$3;
+            lv.type=IDENTIFIER;
+            $$=new select_cond(*$1,E,lv);
+        }
+        ;
+
+
+        
     /* 
         need to implement select statement
     */
