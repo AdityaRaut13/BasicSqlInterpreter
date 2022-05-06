@@ -2,7 +2,7 @@ department
 :departno:266:10:1
 ::273 -1:275 1##:277 100##
 ::,
-::student,departno:
+::student,departno_s:
 :departname:265:20:0
 :#
 ::,
@@ -16,7 +16,7 @@ student
 :#
 ::,
 ::
-:departno:266:10:0
+:departno_s:266:10:0
 :#
 ::department,departno
 ::

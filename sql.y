@@ -395,9 +395,20 @@ select_stmt:SELECT columns FROM table_list WHERE sexpr SEMICOLON
               select_from_tables($2,$4,$6);  
            }
            ;
-table_list:IDENTIFIER { $$=new std::vector<std::string*>*; $$->push_back($1); }
+table_list:IDENTIFIER
+          { 
+                std::vector<std::string*>* strings=new std::vector<std::string*>;
+                if(check_table(*$1))
+                    strings->push_back($1);
+                else 
+                    yyerror("The table does not exists");
+                $$=strings;
+          }
           | table_list COMMA IDENTIFIER {
-                $1->push_back($3);
+                if(check_table(*$3))
+                    $1->push_back($3);
+                else 
+                    yyerror("The table does not exists");
                 $$=$1;
           }
 

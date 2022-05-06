@@ -14,3 +14,5 @@
 #define BUFFER1                                                                \
   "/home/interloper/Documents/academic/sem6/dbms/courseProject2.0/dbms/"       \
   "buffer1.txt"
+
+#define PADDING 5
