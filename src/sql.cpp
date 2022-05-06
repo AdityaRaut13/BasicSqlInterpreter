@@ -1049,7 +1049,6 @@ void select_recurse(std::vector<std::string> &record,
 		while(std::getline(file, line))
 		{
 			curr_record = tokenize(line, "#");
-			if(curr_record.size() < table_names->size())break;
 			for(int i = 0; i < curr_record.size() - 1 ; i++)
 				attrs.push_back(curr_record[i]);
 			select_recurse(attrs, conditions, map, index + 1, table_names, cols, selected_columns, result);
@@ -1112,6 +1111,12 @@ void select_from_tables(std::vector<std::string *> *column_selected,
 	std::vector<std::vector<std::string>> result;
 	select_recurse(record, conditions, map, 0, table_names, cols, column_selected, result);
 	display_record(column_selected, result, cols, map);
+	for(int i = 0; i < table_names->size(); i++)
+		delete table_names->at(i);
+	for(int i = 0; i < column_selected->size(); i++)
+		delete column_selected->at(i);
+	delete table_names;
+	delete column_selected;
 	delete cols;
 }
 
