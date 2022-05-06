@@ -27,3 +27,4 @@ extern void add_reference_attr(reference_list *refer, std::string &table_name);
 extern void drop_table(std::string table_name);
 extern void insert_into_table(std::string table_name, values_list *list);
 extern void delete_from_table(std::string table_name, select_cond *conditions);
+extern void update_table(std::string table_name, update_sets *list, select_cond *conditions);

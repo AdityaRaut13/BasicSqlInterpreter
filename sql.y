@@ -22,6 +22,8 @@
 	values_list* literals_list;
 	Values* literal;
     select_cond* scond;
+    update_set* update_set_val;
+    update_sets* list_sets;
     float fval;
 }
 
@@ -35,6 +37,7 @@
 %token DROP
 %token INSERT INTO VALUES
 %token DELETE FROM WHERE
+%token UPDATE SET 
 
 
 
@@ -53,11 +56,15 @@
 %type <condition> expr or_expr and_expr
 %type <condition> condition
 %type <literals_list> list_values
+%type<literal> diff_value
+%type<literal> diff_value_without_identifier
 %type<literal> list_value
 %type<scond> sexpr
 %type<scond> sor_expr;
 %type<scond> sand_expr;
 %type<scond> scond_b;
+%type<update_set_val> update_value;
+%type<list_sets> update_values;
 %start statements
 
 
@@ -73,6 +80,7 @@ statement:create_stmt
          |drop_stmt 
          | insert_stmt
          | delete_stmt
+         | update_stmt
          ;
 
 create_stmt:CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON
@@ -255,10 +263,7 @@ list_value: NUMBER {
 delete_stmt:DELETE FROM IDENTIFIER WHERE sexpr SEMICOLON
            {
 				if(check_table(*$3)==true)
-                {
                         delete_from_table(*$3,$5);
-                        std::cout<<"Deleted successfully\n";
-                }
                 else
                     yyerror("The Table Does not exists");
            }
@@ -285,182 +290,102 @@ sand_expr:sand_expr AND scond_b
             $$=$1;
         }
         ;
-scond_b: IDENTIFIER GE NUMBER{
-            Values lv;
-            lv.data=std::to_string($3);
-            lv.type=INT;
-            $$=new select_cond(*$1,GE,lv);
+scond_b: IDENTIFIER GE diff_value{
+            $$=new select_cond(*$1,GE,$3->data,$3->type);
+            delete $3;
 
         }
-        |IDENTIFIER GT NUMBER{
-            Values lv;
-            lv.data=std::to_string($3);
-            lv.type=INT;
-            $$=new select_cond(*$1,GT,lv);
+        |IDENTIFIER GT diff_value{
+            $$=new select_cond(*$1,GT,$3->data,$3->type);
+            delete $3;
 
         }
-        |IDENTIFIER NE NUMBER{
-            Values lv;
-            lv.data=std::to_string($3);
-            lv.type=INT;
-            $$=new select_cond(*$1,NE,lv);
+        |IDENTIFIER NE diff_value{
+            $$=new select_cond(*$1,NE,$3->data,$3->type);
+            delete $3;
         
         }
-        |IDENTIFIER LT NUMBER{
-            Values lv;
-            lv.data=std::to_string($3);
-            lv.type=INT;
-            $$=new select_cond(*$1,LT,lv);
+        |IDENTIFIER LT diff_value{
+            $$=new select_cond(*$1,LT,$3->data,$3->type);
+            delete $3;
         }
-        |IDENTIFIER LE NUMBER{
-            Values lv;
-            lv.data=std::to_string($3);
-            lv.type=INT;
-            $$=new select_cond(*$1,LE,lv);
+        |IDENTIFIER LE diff_value{
+            $$=new select_cond(*$1,LE,$3->data,$3->type);
+            delete $3;
         }
-        |IDENTIFIER E NUMBER
+        |IDENTIFIER E diff_value
         {
-            Values lv;
-            lv.data=std::to_string($3);
-            lv.type=INT;
-            $$=new select_cond(*$1,E,lv);
+            $$=new select_cond(*$1,E,$3->data,$3->type);
+            delete $3;
         }
-        |IDENTIFIER GE FLOAT
+        | OPEN_PAR sexpr CLOSE_PAR 
         {
-            Values lv;
-            lv.data=std::to_string($3);
-            lv.type=DECIMAL;
-            $$=new select_cond(*$1,GE,lv);
-        }
-        |IDENTIFIER GT FLOAT
-        {
-            Values lv;
-            lv.data=std::to_string($3);
-            lv.type=DECIMAL;
-            $$=new select_cond(*$1,GT,lv);
-        }
-        |IDENTIFIER NE FLOAT
-        {
-            Values lv;
-            lv.data=std::to_string($3);
-            lv.type=DECIMAL;
-            $$=new select_cond(*$1,NE,lv);
-        }
-        |IDENTIFIER LT FLOAT
-        {
-            Values lv;
-            lv.data=std::to_string($3);
-            lv.type=DECIMAL;
-            $$=new select_cond(*$1,LT,lv);
-        }
-        |IDENTIFIER LE FLOAT
-        {
-            Values lv;
-            lv.data=std::to_string($3);
-            lv.type=DECIMAL;
-            $$=new select_cond(*$1,LE,lv);
-        }
-        |IDENTIFIER E  FLOAT     
-        {
-            Values lv;
-            lv.data=std::to_string($3);
-            lv.type=DECIMAL;
-            $$=new select_cond(*$1,E,lv);
-        }
-        |IDENTIFIER GE STRING
-        {
-            Values lv;
-            lv.data=*$3;
-            lv.type=CHAR;
-            $$=new select_cond(*$1,E,lv);
-        }
-        |IDENTIFIER GT STRING
-        {
-            Values lv;
-            lv.data=*$3;
-            lv.type=CHAR;
-            $$=new select_cond(*$1,GT,lv);
-        }
-        |IDENTIFIER NE STRING
-        {
-            Values lv;
-            lv.data=*($3);
-            lv.type=CHAR;
-            $$=new select_cond(*$1,NE,lv);
-        }
-        |IDENTIFIER LT STRING
-        {
-            Values lv;
-            lv.data=*$3;
-            lv.type=CHAR;
-            $$=new select_cond(*$1,LT,lv);
-        }
-        |IDENTIFIER LE STRING
-        {
-            Values lv;
-            lv.data=*$3;
-            lv.type=CHAR;
-            $$=new select_cond(*$1,LE,lv);
-        }
-        |IDENTIFIER E STRING
-        {
-            Values lv;
-            lv.data=*($3);
-            lv.type=CHAR;
-            $$=new select_cond(*$1,E,lv);
-        }
-        |IDENTIFIER GE IDENTIFIER
-        {
-            Values lv;
-            lv.data=*($3);
-            lv.type=IDENTIFIER;
-            $$=new select_cond(*$1,GE,lv);
-        }
-        |IDENTIFIER GT IDENTIFIER
-        {
-            Values lv;
-            lv.data=*($3);
-            lv.type=IDENTIFIER;
-            $$=new select_cond(*$1,GT,lv);
-        }
-        |IDENTIFIER NE IDENTIFIER
-        {
-            Values lv;
-            lv.data=*($3);
-            lv.type=IDENTIFIER;
-            $$=new select_cond(*$1,NE,lv);
-        }
-        |IDENTIFIER LT IDENTIFIER
-        {
-            Values lv;
-            lv.data=*($3);
-            lv.type=IDENTIFIER;
-            $$=new select_cond(*$1,LT,lv);
-        }
-        |IDENTIFIER LE IDENTIFIER
-        {
-            Values lv;
-            lv.data=*($3);
-            lv.type=IDENTIFIER;
-            $$=new select_cond(*$1,LE,lv);
-        }
-        |IDENTIFIER E IDENTIFIER
-        {
-            Values lv;
-            lv.data=*$3;
-            lv.type=IDENTIFIER;
-            $$=new select_cond(*$1,E,lv);
+            $$=$2;
         }
         ;
+diff_value:IDENTIFIER  
+          {  
+                $$=new Values();
+                $$->data=*$1;
+                $$->type=IDENTIFIER;
+          }
+          | diff_value_without_identifier { $$=$1; }
+          ;
 
+diff_value_without_identifier:STRING
+          {  
+                $$=new Values();
+                $$->data=*$1;
+                $$->type=CHAR;    
+          }
+          | NUMBER
+          {
+
+                $$=new Values();
+                $$->data=std::to_string($1);
+                $$->type=INT;    
+          }
+          | FLOAT
+          {
+
+                $$=new Values();
+                $$->data=std::to_string($1);
+                $$->type=DECIMAL;    
+          }
+          ;
+
+
+    /*     update conditions need to implemented                       */
+
+
+update_stmt:UPDATE IDENTIFIER SET update_values WHERE sexpr SEMICOLON
+           {
+				if(check_table(*$2)==true)
+                        update_table(*$2,$4,$6);
+                else
+                    yyerror("The Table Does not exists");
+           }
+           ;
+
+update_values:update_value { $$=new update_sets; $$->push_back($1); }
+             | update_values COMMA update_value 
+             {
+                $1->push_back($3);
+                $$=$1;
+             }
+             ;
+update_value:IDENTIFIER E diff_value_without_identifier 
+            {
+                update_set * new_set= new update_set(*$1,$3->data,$3->type);
+                delete $3;
+                $$=new_set;
+            }
+            ;
 
         
     /* 
         need to implement select statement
     */
-
-
-
 
 %%
 

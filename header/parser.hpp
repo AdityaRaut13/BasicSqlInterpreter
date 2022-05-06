@@ -84,10 +84,12 @@ extern int yydebug;
     DELETE = 285,                  /* DELETE  */
     FROM = 286,                    /* FROM  */
     WHERE = 287,                   /* WHERE  */
-    IDENTIFIER = 288,              /* IDENTIFIER  */
-    STRING = 289,                  /* STRING  */
-    NUMBER = 290,                  /* NUMBER  */
-    FLOAT = 291                    /* FLOAT  */
+    UPDATE = 288,                  /* UPDATE  */
+    SET = 289,                     /* SET  */
+    IDENTIFIER = 290,              /* IDENTIFIER  */
+    STRING = 291,                  /* STRING  */
+    NUMBER = 292,                  /* NUMBER  */
+    FLOAT = 293                    /* FLOAT  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -109,9 +111,11 @@ union YYSTYPE
 	values_list* literals_list;
 	Values* literal;
     select_cond* scond;
+    update_set* update_set_val;
+    update_sets* list_sets;
     float fval;
 
-#line 115 "header/parser.hpp"
+#line 119 "header/parser.hpp"
 
 };
 typedef union YYSTYPE YYSTYPE;

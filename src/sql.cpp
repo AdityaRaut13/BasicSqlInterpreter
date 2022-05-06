@@ -600,6 +600,8 @@ bool check_condition(std::vector<std::string> strings, select_cond *conditions,
                      std::unordered_map<std::string, int> &map, col_list *cols)
 {
 	// need to implement this feature
+	if(conditions == nullptr)
+		return true;
 	if(conditions->relation_type == GE and conditions->op2.type == INT)
 	{
 		int number1 = std::stoi(strings[map[conditions->op1]]);
@@ -891,25 +893,58 @@ void delete_from_table(std::string table_name, select_cond *conditions)
 	for(int i = 0; i < cols->size(); i++)
 		map[cols->at(i)->column_name] = i;
 	std::fstream file(PATH + table_name, std::ios_base::in);
-	std::fstream buffer(BUFFER_TABLE0, std::ios_base::out);
+	std::fstream buffer0(BUFFER_TABLE0, std::ios_base::out);
 	std::string line;
 	int line_count = 0;
 	while(std::getline(file, line))
 	{
 		std::vector<std::string> strings = tokenize(line, "#");
-		if(check_condition(strings, conditions, map, cols) == true)
+		if(check_condition(strings, conditions, map, cols) == true )
 		{
 			// this is to be deleted
+			line_count++;
 			continue;
 		}
-		line_count++;
-		buffer << line << "\n";
+		buffer0 << line << "\n";
 	}
 	file.close();
-	buffer.close();
-	//std::string file_path(PATH);
-	//file_path += table_name;
-	//std::rename(BUFFER0, file_path.c_str());
+	buffer0.close();
+	std::string file_path(PATH);
+	file_path += table_name;
+	std::remove(file_path.c_str());
+	std::rename(BUFFER_TABLE0, file_path.c_str());
+	for(int i = 0; i < cols->size(); i++)
+		delete cols->at(i);
+	delete cols;
+	std::cout << line_count << " rows were affected.\n";
 }
+
+
+
+void update_table(std::string table_name, update_sets *list, select_cond *conditions)
+{
+	col_list *cols = get_table(table_name);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
