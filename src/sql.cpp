@@ -285,8 +285,18 @@ void makes_referenced_list(std::string &line, referenced_list &list)
 	}
 }
 
-cond *get_condition(std::string &line, std::string &table_name)
+cond *get_condition(std::string &line, std::string &column_name)
 {
+	/*
+	 * Get conditions
+	 *      transforms the string representation of the condition tree to
+	 *      condition tree
+	 *  Parameter  :
+	 *      line : the string representation
+	 *      column_name : the specified column for which the conditions tree must be there
+	 *  Returns :
+	 *      The condition node cond pointer
+	 * */
 	int16_t relation_type, number;
 	cond *node;
 	if (line[0] == '#')
@@ -309,9 +319,9 @@ cond *get_condition(std::string &line, std::string &table_name)
 			number_str += line[position++];
 		number = std::stoi(number_str);
 		line = line.substr(position);
-		node = new cond(relation_type, number, table_name);
-		node->left = get_condition(line, table_name);
-		node->right = get_condition(line, table_name);
+		node = new cond(relation_type, number, column_name);
+		node->left = get_condition(line, column_name);
+		node->right = get_condition(line, column_name);
 	}
 	return node;
 }
@@ -475,6 +485,15 @@ void drop_table(std::string table_name)
 
 bool check_column_insertion(col *column, Values *val)
 {
+	/*
+	 * Given :
+	 *  column and the values
+	 * Check the column constraints and also the length and data of the val and the col .
+	 * Returns :
+	 *  True : if satisfy all the column constraints, not
+	 *         checking the primary and foreign key constraints
+	 *  False : if not satisfied
+	 * */
 	if (column->type != val->type or column->length < val->data.length())
 		return false;
 	switch (val->type)
@@ -500,6 +519,11 @@ bool check_column_insertion(col *column, Values *val)
 
 bool check_primary_key(std::string table_name, Values *val, int index)
 {
+	/*
+	 * Returns :
+	 *  True : if the element is present in table
+	 *  False : if not present
+	 * */
 	std::ifstream file(PATH + table_name);
 	std::string line;
 	while (std::getline(file, line))
@@ -517,6 +541,12 @@ bool check_primary_key(std::string table_name, Values *val, int index)
 bool check_foreign_key(std::string &table_name, std::string &column_name,
                        Values *val)
 {
+	/*
+	 * Check the table and the specified column name
+	 * Returns :
+	 *  True : if the element exists in the table_name and the specified column name
+	 *  False : if not exists
+	 * */
 	col_list *cols = get_table(table_name);
 	int index = 0;
 	for (col *column : *cols)
@@ -533,15 +563,12 @@ bool check_foreign_key(std::string &table_name, std::string &column_name,
 	while (std::getline(file, line))
 	{
 		std::vector<std::string> tokens = tokenize(line, "#");
-		if (tokens[index] == val->data)
+		if (index < tokens.size() and tokens[index] == val->data)
 		{
 			file.close();
 			return true;
 		}
 	}
-	for (int i = 0; i < cols->size(); i++)
-		delete cols->at(i);
-	delete cols;
 	file.close();
 	return false;
 }
@@ -599,7 +626,6 @@ void insert_into_table(std::string table_name, values_list *list)
 bool check_condition(std::vector<std::string> strings, select_cond *conditions,
                      std::unordered_map<std::string, int> &map, col_list *cols)
 {
-	// need to implement this feature
 	if(conditions == nullptr)
 		return true;
 	if(conditions->relation_type == GE and conditions->op2.type == INT)
@@ -919,29 +945,72 @@ void delete_from_table(std::string table_name, select_cond *conditions)
 	std::cout << line_count << " rows were affected.\n";
 }
 
+void insert_record(std::fstream &file, std::vector<std::string>const &strings)
+{
+	int size = strings.size();
+	for(int i = 0; i < size - 1 ; i++)
+		file << strings[i] << "#";
+	file << "\n";
+}
+
 
 
 void update_table(std::string table_name, update_sets *list, select_cond *conditions)
 {
 	col_list *cols = get_table(table_name);
+	std::unordered_map<std::string, int> map;
+	for(int i = 0; i < cols->size(); i++)
+		map[cols->at(i)->column_name] = i;
+	std::unordered_map<int, std::string> update_map;
+	for(update_set *element : *list )
+	{
+		// error checking part
+		if (cols->at(map[element->column_name])->primary_key
+		        and check_primary_key(table_name, &element->val, map[element->column_name]))
+			fatal("Primary already present\n");
+		else if ( !cols->at(map[element->column_name])->referencing_tab.empty())
+		{
+			// this is foreign key
+			col *column = cols->at(map[element->column_name]);
+			if(!check_foreign_key(column->referencing_tab, column->referencing_col, &element->val))
+				fatal("The foreign key does not exist");
+		}
+		// actual updation
+		update_map[map[element->column_name]] = element->val.data;
+	}
+	std::fstream file(PATH + table_name, std::ios_base::in);
+	std::fstream buffer0(BUFFER_TABLE0, std::ios_base::out);
+	std::string line;
+	int line_count = 0;
+	while(std::getline(file, line))
+	{
+		std::vector<std::string> strings = tokenize(line, "#");
+		if(check_condition(strings, conditions, map, cols) == true )
+		{
+			for(auto element : update_map)
+				strings[element.first] = element.second;
+			insert_record(buffer0, strings);
+			line_count++;
+			continue;
+		}
+		buffer0 << line << "\n";
+	}
+	file.close();
+	buffer0.close();
+	std::string file_path(PATH);
+	file_path += table_name;
+	std::remove(file_path.c_str());
+	std::rename(BUFFER_TABLE0, file_path.c_str());
+	for(int i = 0; i < cols->size(); i++)
+		delete cols->at(i);
+	delete cols;
+	std::cout << line_count << " rows were affected.\n";
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+void select_from_tables(std::vector<std::string *> *column_selected, std::vector<std::string *> *table_names, select_cond *conditions)
+{
+	// get the various tables in
+}
 
 
 

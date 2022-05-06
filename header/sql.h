@@ -28,3 +28,6 @@ extern void drop_table(std::string table_name);
 extern void insert_into_table(std::string table_name, values_list *list);
 extern void delete_from_table(std::string table_name, select_cond *conditions);
 extern void update_table(std::string table_name, update_sets *list, select_cond *conditions);
+extern void select_from_tables(std::vector<std::string *> *column_selected, std::vector<std::string *> *table_names, select_cond *conditions);
+
+

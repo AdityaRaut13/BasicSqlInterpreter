@@ -31,6 +31,7 @@ FROM return FROM;
 WHERE return WHERE;
 UPDATE return UPDATE;
 SET return SET;
+SELECT return SELECT;
 [-+]?[0-9]+ {   yylval.ival=atoi(yytext);  return NUMBER; }
 
 [1-9][0-9]+\.[0-9]+([eE][+-]?[0-9]+)? { yylval.fval=atof(yytext); return FLOAT; }

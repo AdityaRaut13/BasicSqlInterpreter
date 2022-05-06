@@ -38,6 +38,7 @@
 %token INSERT INTO VALUES
 %token DELETE FROM WHERE
 %token UPDATE SET 
+%token SELECT
 
 
 
@@ -47,6 +48,7 @@
 
 %type <string_array> primary_key
 %type <string_array> columns
+%type <string_array> table_list
 %type <string> column
 %type <cols> definitions
 %type <column> definition
@@ -81,6 +83,7 @@ statement:create_stmt
          | insert_stmt
          | delete_stmt
          | update_stmt
+         | select_stmt
          ;
 
 create_stmt:CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON
@@ -386,6 +389,17 @@ update_value:IDENTIFIER E diff_value_without_identifier
     /* 
         need to implement select statement
     */
+
+select_stmt:SELECT columns FROM table_list WHERE sexpr SEMICOLON
+           {
+              select_from_tables($2,$4,$6);  
+           }
+           ;
+table_list:IDENTIFIER { $$=new std::vector<std::string*>*; $$->push_back($1); }
+          | table_list COMMA IDENTIFIER {
+                $1->push_back($3);
+                $$=$1;
+          }
 
 %%
 
