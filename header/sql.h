@@ -7,7 +7,7 @@
 
 extern bool check_table(std::string &table_name);
 
-extern col_list *get_table(std::string &table_name);
+extern col_list *get_table(std::string const &table_name);
 
 /*
  * check the reference exist meaning that the table exits and the primary of the

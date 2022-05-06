@@ -8,9 +8,9 @@ CREATE TABLE student
 (
     id INT(10) CHECK id > 0 AND id<100,
     name CHAR(20),
-    departno INT(10),
+    departno_s INT(10),
     PRIMARY KEY (id),
-    FOREIGN KEY (departno) REFERENCES department(departno)
+    FOREIGN KEY (departno_s) REFERENCES department(departno)
 );
 
 INSERT INTO department VALUES (11,'Comp');  
@@ -28,22 +28,6 @@ INSERT INTO student VALUES (5,'Sagar',12);
 INSERT INTO student VALUES (6,'yash',12);
 
 
-UPDATE student SET departno=15 WHERE id=5;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+SELECT id,name,departname FROM student,department WHERE departno_s=departno;
 
 
