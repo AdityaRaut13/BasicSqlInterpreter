@@ -39,6 +39,7 @@
 %token DELETE FROM WHERE
 %token UPDATE SET 
 %token SELECT
+%token HELP TABLES
 
 
 
@@ -84,6 +85,7 @@ statement:create_stmt
          | delete_stmt
          | update_stmt
          | select_stmt
+         | help_tables
          ;
 
 create_stmt:CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON
@@ -411,6 +413,12 @@ table_list:IDENTIFIER
                     yyerror("The table does not exists");
                 $$=$1;
           }
+          ;
+help_tables:HELP TABLES SEMICOLON
+           {
+                help_tables();
+           }
+
 
 %%
 

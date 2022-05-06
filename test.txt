@@ -26,8 +26,6 @@ INSERT INTO student VALUES (3,'Vedant',11);
 INSERT INTO student VALUES (4,'Rushikesh',12);
 INSERT INTO student VALUES (5,'Sagar',12);
 INSERT INTO student VALUES (6,'yash',12);
-
-
-SELECT id,name,departname FROM student,department WHERE departno_s=departno;
+HELP TABLES;
 
 

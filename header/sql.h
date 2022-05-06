@@ -31,3 +31,4 @@ extern void update_table(std::string table_name, update_sets *list, select_cond 
 extern void select_from_tables(std::vector<std::string *> *column_selected, std::vector<std::string *> *table_names, select_cond *conditions);
 
 
+extern void help_tables(void);

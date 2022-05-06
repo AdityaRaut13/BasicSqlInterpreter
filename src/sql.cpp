@@ -1120,8 +1120,16 @@ void select_from_tables(std::vector<std::string *> *column_selected,
 	delete cols;
 }
 
-
-
-
-
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
+void help_tables(void)
+{
+	std::string path(PATH);
+	for(auto  &entry : fs::directory_iterator(path))
+	{
+		std::string temp = entry.path();
+		temp = temp.substr(temp.rfind('/') + 1, temp.length() - temp.rfind('/') - 1 );
+		std::cout << temp << "\n";
+	}
+}
 
