@@ -1,4 +1,3 @@
-
 #include "config.h"
 #include "node.h"
 #include "parser.hpp"
@@ -270,7 +269,8 @@ int create_table(std::string &table_name, col_list *cols)
 void makes_referenced_list(std::string &line, referenced_list &list)
 {
 	/*
-	   takes the input string parses it and then returns the result in list
+	 * The references are stored in the list variable.
+	 * Takes the input string parses it and then returns the result in list
 	*/
 	std::vector<std::string> raw_referenced_list = tokenize(line, ":");
 	std::vector<std::string> temp;
@@ -448,10 +448,6 @@ void display_table(col_list *cols)
 
 void drop_table(std::string table_name)
 {
-	/*
-	  The reference
-
-	*/
 	std::ofstream buffer(BUFFER0);
 	std::fstream file(CATALOG_PATH);
 	std::string line;
@@ -465,14 +461,12 @@ void drop_table(std::string table_name)
 				std::getline(file, line);
 				std::getline(file, line);
 			}
+			file.seekg((int)file.tellg() - line.length() - 1, file.beg);
+			continue;
 		}
-		else
-		{
+		buffer << line << "\n";
+		while (std::getline(file, line) and line[0] == ':')
 			buffer << line << "\n";
-			while (std::getline(file, line) and line[0] == ':')
-				buffer << line << "\n";
-		}
-		file.seekg((int)file.tellg() - line.length() - 1, file.beg);
 	}
 	buffer.close();
 	file.close();
@@ -510,6 +504,7 @@ bool check_column_insertion(col *column, Values *val)
 				float number = std::stoi(val->data);
 				if (column->conditions and !column->conditions->apply(number))
 					return false;
+				break;
 			}
 		default:
 			return true;
@@ -520,6 +515,8 @@ bool check_column_insertion(col *column, Values *val)
 bool check_primary_key(std::string table_name, Values *val, int index)
 {
 	/*
+	 * Check inside the table_name for the val->data at the index position
+	 * after parsing.
 	 * Returns :
 	 *  True : if the element is present in table
 	 *  False : if not present
@@ -597,8 +594,11 @@ void insert_into_table(std::string table_name, values_list *list)
 			{
 				file.close();
 				bool is_present = check_primary_key(table_name, list->at(i), i);
-				if (is_present)
+				if (is_present )
+				{
+					file.close();
 					fatal("The key is already present\n");
+				}
 				file.open(PATH + table_name, std::ios_base::in | std::ios_base::app);
 			}
 			if (!cols->at(i)->referencing_tab.empty())
@@ -610,7 +610,10 @@ void insert_into_table(std::string table_name, values_list *list)
 				    check_foreign_key(cols->at(i)->referencing_tab,
 				                      cols->at(i)->referencing_col, list->at(i));
 				if (!foreign_key_present)
+				{
+					file.close();
 					fatal("The foreign does not exist\n");
+				}
 			}
 			file << list->at(i)->data << "#";
 			continue;
@@ -1115,6 +1118,8 @@ void select_from_tables(std::vector<std::string *> *column_selected,
 		delete table_names->at(i);
 	for(int i = 0; i < column_selected->size(); i++)
 		delete column_selected->at(i);
+	for(int i = 0; i < cols->size(); i++)
+		delete cols->at(i);
 	delete table_names;
 	delete column_selected;
 	delete cols;
@@ -1132,4 +1137,11 @@ void help_tables(void)
 		std::cout << temp << "\n";
 	}
 }
+void save_to_buffer(void)
+{
+}
+
+
+
+
 

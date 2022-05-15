@@ -40,6 +40,8 @@
 %token UPDATE SET 
 %token SELECT
 %token HELP TABLES
+%token QUIT
+%token CONDITIONS
 
 
 
@@ -86,6 +88,8 @@ statement:create_stmt
          | update_stmt
          | select_stmt
          | help_tables
+		 | help_cmd
+		 | quit_stmt 
          ;
 
 create_stmt:CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON
@@ -102,7 +106,11 @@ create_stmt:CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA
             for(col* column : *$5)
                 delete column;
             delete $5;
+			for(std::string* str: *$7)
+				delete str;
             delete $7;
+			for(reference* ref:*$9)
+				delete ref;
             delete $9;
 
             
@@ -111,6 +119,12 @@ create_stmt:CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA
     {
         raise_primary_key($5,$7);
         create_table(*$3,$5);
+        for(col* column : *$5)
+            delete column;
+		delete $5;
+		for(std::string* str: *$7)
+			delete str;
+        delete $7;
     }
 	;
 
@@ -418,6 +432,104 @@ help_tables:HELP TABLES SEMICOLON
            {
                 help_tables();
            }
+
+help_cmd:HELP cmd ;
+cmd:CREATE TABLE {
+		std::string print_string=	"The Create statement :\n"
+				"\tCREATE TABLE table_name ( \n"
+				"\t\tattribute_1 attribute1_type CHECK (constraint1),\n"
+				"\t\tattribute_2 attribute2_type, \n"
+				"\t\t…,\n"
+				"\t\tPRIMARY KEY ( attribute_1, attribute_2 ),\n"
+				"\t\tFOREIGN KEY ( attribute_y ) REFERENCES table_x ( attribute_t ), \n"
+				"\t\tFOREIGN KEY ( attribute_w ) REFERENCES table_y ( attribute_z ), \n"
+				"\t\t…, \n"
+				"\t);\n"
+				"The primary key constraint is neccessary\n"
+				"The foreign key and check constraint is not neccessary\n"
+				"For the Check constraints , check HELP CREATE CONDITIONS"
+				;
+		std::cout<<print_string<<std::endl;
+   }
+   | DROP TABLE 
+   {
+		std::string print_string="\n\nDrop Table : \n"
+		"\tDROP TABLE table_name;\n"
+		"The table_name specified will be dropped.\n"
+		"The table is dropped temporarily\n"
+		"If Commit is passed after this command the table will be dropped Permanently\n";
+		std::cout<<print_string<<std::endl;
+   }
+   | SELECT 
+   {
+		std::string print_string="\n\nThe Select Statement : \n"
+		"\t\tSELECT \n"
+		"\t\tattribute_1,attribute_2,...,\n"
+		"\t\tFROM\n"
+		"\t\ttable_name_1,table_name_2,...,\n"
+		"\t\tWHERE\n"
+		"\t\tconditions;\n"
+		"The SELECT command will do the cross product based on recursion for the \n"
+		"various table and then will select the attributes specified from the table\n"
+		"Each foreign key must have a unique name .\n"
+		"And Each column name must have a unique name\n"
+		"For the conditions , check HELP SELECT CONDITIONS\n";
+		std::cout<<print_string<<std::endl;
+   }
+   | INSERT 
+   {
+		std::string print_string="\n\nThe Insert Statement : \n"
+		"\t\tINSERT INTO\n"
+		"\t\ttable_name\n"
+		"\t\tVALUES\n"
+		"\t\t(\n"
+		"\t\tattribute_literal,attribute_literal,..\n"
+		"\t\t);\n"
+		"Insert Command will check for the check constraint\n"
+		"and also the foreign key and the primary key constraints.\n"
+		"Insert command will be saved Permanently when commit\n "
+		"is followed by insert.\n";
+		std::cout<<print_string<<std::endl;
+   }
+   | DELETE 
+   {
+		std::string print_string="\n\nThe Delete Statement : \n"
+		"\t\tDELETE FROM\n"
+		"\t\ttable_name\n"
+		"\t\tWHERE\n"
+		"\t\tconditons;\n"
+		"The Delete command deletes the record based on the conditions.\n"
+		"For condition check HELP SELECT CONDITIONS.\n";
+		std::cout<<print_string<<std::endl;
+   }
+   | UPDATE
+   {
+		std::string print_string="\n\nThe Update statement : \n"
+		"\t\tUPDATE table_name\n"
+		"\t\tSET\n"
+		"\t\tattr=attr_literal,attr=attr_literal,...\n"
+		"\t\tWHERE\n"
+		"\t\tconditions;\n"
+		"The Update command updates the record based on the conditions.\n"
+		"For condition check HELP SELECT CONDITIONS.\n";
+		std::cout<<print_string<<std::endl;
+   }
+   | CONDITIONS 
+   {
+		std::string print_string="\n\nThe Conditions :\n"
+		"\t\toperand1 operator operand2\n"
+		"The operand1 is always some column_name .\n"
+		"The operator can be >,<,<=,>=,=\n"
+		"The operand2 can be column name or string literal , decimal or integer\n";
+		std::cout<<print_string<<std::endl;
+   }
+   ;
+quit_stmt:QUIT SEMICOLON
+		 {
+		 	save_to_buffer();
+		 }
+		 ;
+
 
 
 %%

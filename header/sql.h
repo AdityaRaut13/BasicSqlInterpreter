@@ -32,3 +32,4 @@ extern void select_from_tables(std::vector<std::string *> *column_selected, std:
 
 
 extern void help_tables(void);
+extern void save_to_buffer(void);

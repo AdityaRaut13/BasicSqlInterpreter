@@ -26,6 +26,10 @@ INSERT INTO student VALUES (3,'foo_Bar_foo',11);
 INSERT INTO student VALUES (4,'foo_barR',12);
 INSERT INTO student VALUES (5,'barfoo',12);
 INSERT INTO student VALUES (6,'barbarfoo',12);
-HELP TABLES;
+
+SELECT id,name,departname FROM student,department WHERE departno_s=departno;
+HELP CREATE TABLE 
+
+
 
 
