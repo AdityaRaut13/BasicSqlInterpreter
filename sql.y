@@ -102,6 +102,7 @@ create_stmt:CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA
             raise_primary_key($5,$7);
             create_table(*$3,$5);
 
+
             // this is for deleting stuff
             for(col* column : *$5)
                 delete column;
@@ -112,6 +113,7 @@ create_stmt:CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA
 			for(reference* ref:*$9)
 				delete ref;
             delete $9;
+			std::cout<<"Table Created\n";
 
             
 	}
@@ -125,6 +127,7 @@ create_stmt:CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA
 		for(std::string* str: *$7)
 			delete str;
         delete $7;
+		std::cout<<"Table Created\n";
     }
 	;
 
@@ -527,6 +530,7 @@ cmd:CREATE TABLE {
 quit_stmt:QUIT SEMICOLON
 		 {
 		 	save_to_buffer();
+			exit(0);
 		 }
 		 ;
 

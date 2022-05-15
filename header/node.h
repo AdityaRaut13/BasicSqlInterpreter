@@ -14,6 +14,7 @@ class cond {
 		cond(int16_t rel, int16_t number, std::string col)
 			: relation_type(rel), number(number), column_name(col), left(nullptr),
 			  right(nullptr) {}
+		~cond();
 		bool apply(int number);
 		bool apply(float number);
 };
@@ -53,6 +54,7 @@ class col {
 		col()
 			: type(0), length(0), column_name(""), conditions(nullptr),
 			  primary_key(false) {}
+		~col();
 };
 
 class Values {
@@ -89,6 +91,7 @@ class select_cond {
 			op2.type = type_op2;
 		}
 		select_cond() : left(nullptr), right(nullptr) {}
+		~select_cond();
 };
 
 

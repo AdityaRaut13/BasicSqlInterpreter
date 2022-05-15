@@ -249,13 +249,12 @@ int create_table(std::string &table_name, col_list *cols)
 	file << table_name << "\n";
 	for (col *column : *cols)
 	{
-		col temp = *column;
-		file << ":" << temp.column_name << ":" << temp.type << ":" << temp.length
-		     << ":" << temp.primary_key << "\n";
+		file << ":" << column->column_name << ":" << column->type << ":" << column->length
+		     << ":" << column->primary_key << "\n";
 		file << ":";
-		write_condition(temp.conditions, file);
+		write_condition(column->conditions, file);
 		file << "\n";
-		file << "::" << temp.referencing_tab << "," << temp.referencing_col << "\n";
+		file << "::" << column->referencing_tab << "," << column->referencing_col << "\n";
 		file << "::\n";
 	}
 	file.close();
@@ -1139,6 +1138,8 @@ void help_tables(void)
 }
 void save_to_buffer(void)
 {
+	fs::copy(BUFFERED, SAVED, fs::copy_options::overwrite_existing |
+	         fs::copy_options::recursive);
 }
 
 

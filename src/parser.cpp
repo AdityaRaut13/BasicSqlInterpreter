@@ -578,14 +578,14 @@ static const yytype_int8 yytranslate[] =
 static const yytype_int16 yyrline[] =
 {
        0,    79,    79,    80,    83,    84,    85,    86,    87,    88,
-      89,    90,    91,    92,    95,   118,   131,   134,   135,   137,
-     142,   143,   145,   149,   153,   159,   160,   166,   167,   168,
-     169,   170,   176,   177,   178,   185,   190,   192,   193,   194,
-     195,   196,   197,   198,   204,   219,   241,   254,   258,   264,
-     267,   271,   282,   291,   292,   293,   300,   307,   312,   317,
-     322,   327,   331,   335,   340,   345,   351,   354,   360,   367,
-     380,   389,   390,   396,   409,   414,   423,   431,   436,   437,
-     454,   463,   479,   494,   505,   517,   527
+      89,    90,    91,    92,    95,   120,   134,   137,   138,   140,
+     145,   146,   148,   152,   156,   162,   163,   169,   170,   171,
+     172,   173,   179,   180,   181,   188,   193,   195,   196,   197,
+     198,   199,   200,   201,   207,   222,   244,   257,   261,   267,
+     270,   274,   285,   294,   295,   296,   303,   310,   315,   320,
+     325,   330,   334,   338,   343,   348,   354,   357,   363,   370,
+     383,   392,   393,   399,   412,   417,   426,   434,   439,   440,
+     457,   466,   482,   497,   508,   520,   530
 };
 #endif
 
@@ -1272,6 +1272,7 @@ yyreduce:
             raise_primary_key((yyvsp[-6].cols),(yyvsp[-4].string_array));
             create_table(*(yyvsp[-8].string),(yyvsp[-6].cols));
 
+
             // this is for deleting stuff
             for(col* column : *(yyvsp[-6].cols))
                 delete column;
@@ -1282,14 +1283,15 @@ yyreduce:
 			for(reference* ref:*(yyvsp[-2].refer_list))
 				delete ref;
             delete (yyvsp[-2].refer_list);
+			std::cout<<"Table Created\n";
 
             
 	}
-#line 1289 "src/parser.cpp"
+#line 1291 "src/parser.cpp"
     break;
 
   case 15: /* create_stmt: CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key CLOSE_PAR SEMICOLON  */
-#line 119 "sql.y"
+#line 121 "sql.y"
     {
         raise_primary_key((yyvsp[-4].cols),(yyvsp[-2].string_array));
         create_table(*(yyvsp[-6].string),(yyvsp[-4].cols));
@@ -1299,198 +1301,199 @@ yyreduce:
 		for(std::string* str: *(yyvsp[-2].string_array))
 			delete str;
         delete (yyvsp[-2].string_array);
+		std::cout<<"Table Created\n";
     }
-#line 1304 "src/parser.cpp"
+#line 1307 "src/parser.cpp"
     break;
 
   case 16: /* primary_key: PRIMARY KEY OPEN_PAR columns CLOSE_PAR  */
-#line 131 "sql.y"
+#line 134 "sql.y"
                                                    {  (yyval.string_array)=(yyvsp[-1].string_array);  }
-#line 1310 "src/parser.cpp"
+#line 1313 "src/parser.cpp"
     break;
 
   case 17: /* foreign_keys: foreign_key  */
-#line 134 "sql.y"
+#line 137 "sql.y"
                           { (yyval.refer_list)=new reference_list;(yyval.refer_list)->push_back((yyvsp[0].refer)); }
-#line 1316 "src/parser.cpp"
+#line 1319 "src/parser.cpp"
     break;
 
   case 18: /* foreign_keys: foreign_keys COMMA foreign_key  */
-#line 135 "sql.y"
+#line 138 "sql.y"
                                                    { (yyvsp[-2].refer_list)->push_back((yyvsp[0].refer)); (yyval.refer_list)=(yyvsp[-2].refer_list);  }
-#line 1322 "src/parser.cpp"
+#line 1325 "src/parser.cpp"
     break;
 
   case 19: /* foreign_key: FOREIGN KEY OPEN_PAR column CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR column CLOSE_PAR  */
-#line 138 "sql.y"
+#line 141 "sql.y"
                 { (yyval.refer)=new reference(*(yyvsp[-3].string),*(yyvsp[-1].string),*(yyvsp[-6].string)); delete (yyvsp[-3].string); delete (yyvsp[-1].string);delete (yyvsp[-6].string); }
-#line 1328 "src/parser.cpp"
+#line 1331 "src/parser.cpp"
     break;
 
   case 20: /* columns: column  */
-#line 142 "sql.y"
+#line 145 "sql.y"
                {  (yyval.string_array)=new std::vector<std::string*>(); (yyval.string_array)->push_back((yyvsp[0].string));  }
-#line 1334 "src/parser.cpp"
+#line 1337 "src/parser.cpp"
     break;
 
   case 21: /* columns: columns COMMA column  */
-#line 143 "sql.y"
+#line 146 "sql.y"
                                 {  (yyvsp[-2].string_array)->push_back((yyvsp[0].string));(yyval.string_array)=(yyvsp[-2].string_array);  }
-#line 1340 "src/parser.cpp"
+#line 1343 "src/parser.cpp"
     break;
 
   case 22: /* column: IDENTIFIER  */
-#line 145 "sql.y"
+#line 148 "sql.y"
                   { (yyval.string)=(yyvsp[0].string);}
-#line 1346 "src/parser.cpp"
+#line 1349 "src/parser.cpp"
     break;
 
   case 23: /* definitions: definition  */
-#line 149 "sql.y"
+#line 152 "sql.y"
                        { 
            (yyval.cols)=new col_list;
            (yyval.cols)->push_back((yyvsp[0].column));
            }
-#line 1355 "src/parser.cpp"
+#line 1358 "src/parser.cpp"
     break;
 
   case 24: /* definitions: definitions COMMA definition  */
-#line 153 "sql.y"
+#line 156 "sql.y"
                                                { 
             (yyvsp[-2].cols)->push_back((yyvsp[0].column));
             (yyval.cols)=(yyvsp[-2].cols);
         }
-#line 1364 "src/parser.cpp"
+#line 1367 "src/parser.cpp"
     break;
 
   case 25: /* definition: IDENTIFIER attr_type  */
-#line 159 "sql.y"
+#line 162 "sql.y"
                                  { (yyvsp[0].column)->column_name=*(yyvsp[-1].string); (yyval.column)=(yyvsp[0].column); delete (yyvsp[-1].string); }
-#line 1370 "src/parser.cpp"
+#line 1373 "src/parser.cpp"
     break;
 
   case 26: /* definition: IDENTIFIER attr_type CHECK expr  */
-#line 160 "sql.y"
+#line 163 "sql.y"
                                                   { (yyvsp[-2].column)->column_name=*(yyvsp[-3].string);
 			(yyvsp[-2].column)->conditions=(yyvsp[0].condition); 
 			(yyval.column)=(yyvsp[-2].column);
 			delete (yyvsp[-3].string);
 			}
-#line 1380 "src/parser.cpp"
+#line 1383 "src/parser.cpp"
     break;
 
   case 27: /* attr_type: CHAR OPEN_PAR NUMBER CLOSE_PAR  */
-#line 166 "sql.y"
+#line 169 "sql.y"
                                                 { (yyval.column)=new col(CHAR,(yyvsp[-1].ival),""); }
-#line 1386 "src/parser.cpp"
+#line 1389 "src/parser.cpp"
     break;
 
   case 28: /* attr_type: INT OPEN_PAR NUMBER CLOSE_PAR  */
-#line 167 "sql.y"
+#line 170 "sql.y"
                                                { (yyval.column)=new col(INT,(yyvsp[-1].ival),""); }
-#line 1392 "src/parser.cpp"
+#line 1395 "src/parser.cpp"
     break;
 
   case 29: /* attr_type: DECIMAL OPEN_PAR NUMBER CLOSE_PAR  */
-#line 168 "sql.y"
+#line 171 "sql.y"
                                                    { (yyval.column)=new col(DECIMAL,(yyvsp[-1].ival),""); }
-#line 1398 "src/parser.cpp"
+#line 1401 "src/parser.cpp"
     break;
 
   case 30: /* attr_type: INT  */
-#line 169 "sql.y"
+#line 172 "sql.y"
                      { (yyval.column)=new col(INT,8,""); }
-#line 1404 "src/parser.cpp"
+#line 1407 "src/parser.cpp"
     break;
 
   case 31: /* attr_type: DECIMAL  */
-#line 170 "sql.y"
+#line 173 "sql.y"
                          { (yyval.column)=new col(DECIMAL,8,""); }
-#line 1410 "src/parser.cpp"
+#line 1413 "src/parser.cpp"
     break;
 
   case 32: /* expr: or_expr  */
-#line 176 "sql.y"
+#line 179 "sql.y"
               { (yyval.condition)=(yyvsp[0].condition);}
-#line 1416 "src/parser.cpp"
+#line 1419 "src/parser.cpp"
     break;
 
   case 33: /* or_expr: and_expr  */
-#line 177 "sql.y"
+#line 180 "sql.y"
                  { (yyval.condition)=(yyvsp[0].condition);}
-#line 1422 "src/parser.cpp"
+#line 1425 "src/parser.cpp"
     break;
 
   case 34: /* or_expr: or_expr OR and_expr  */
-#line 178 "sql.y"
+#line 181 "sql.y"
                                 {  
 		(yyval.condition)=new cond(OR,-1,"");
 		(yyval.condition)->left=(yyvsp[-2].condition);
 		(yyval.condition)->right=(yyvsp[0].condition);
 		}
-#line 1432 "src/parser.cpp"
+#line 1435 "src/parser.cpp"
     break;
 
   case 35: /* and_expr: and_expr AND condition  */
-#line 185 "sql.y"
+#line 188 "sql.y"
                                 {
 		(yyval.condition)=new cond(AND,-1,"");
 		(yyval.condition)->left=(yyvsp[-2].condition);
 		(yyval.condition)->right=(yyvsp[0].condition);
 		}
-#line 1442 "src/parser.cpp"
+#line 1445 "src/parser.cpp"
     break;
 
   case 36: /* and_expr: condition  */
-#line 190 "sql.y"
+#line 193 "sql.y"
                     { (yyval.condition)=(yyvsp[0].condition);}
-#line 1448 "src/parser.cpp"
+#line 1451 "src/parser.cpp"
     break;
 
   case 37: /* condition: IDENTIFIER GE NUMBER  */
-#line 192 "sql.y"
+#line 195 "sql.y"
                                  { (yyval.condition)=new cond(GE,(yyvsp[0].ival),*(yyvsp[-2].string)); delete (yyvsp[-2].string); }
-#line 1454 "src/parser.cpp"
+#line 1457 "src/parser.cpp"
     break;
 
   case 38: /* condition: IDENTIFIER GT NUMBER  */
-#line 193 "sql.y"
+#line 196 "sql.y"
                                        { (yyval.condition)=new cond(GT,(yyvsp[0].ival),*(yyvsp[-2].string)); delete (yyvsp[-2].string); }
-#line 1460 "src/parser.cpp"
+#line 1463 "src/parser.cpp"
     break;
 
   case 39: /* condition: IDENTIFIER NE NUMBER  */
-#line 194 "sql.y"
+#line 197 "sql.y"
                                        { (yyval.condition)=new cond(NE,(yyvsp[0].ival),*(yyvsp[-2].string));	delete (yyvsp[-2].string); }
-#line 1466 "src/parser.cpp"
+#line 1469 "src/parser.cpp"
     break;
 
   case 40: /* condition: IDENTIFIER LT NUMBER  */
-#line 195 "sql.y"
+#line 198 "sql.y"
                                        { (yyval.condition)=new cond(LT,(yyvsp[0].ival),*(yyvsp[-2].string));	delete (yyvsp[-2].string); }
-#line 1472 "src/parser.cpp"
+#line 1475 "src/parser.cpp"
     break;
 
   case 41: /* condition: IDENTIFIER LE NUMBER  */
-#line 196 "sql.y"
+#line 199 "sql.y"
                                        { (yyval.condition)=new cond(LE,(yyvsp[0].ival),*(yyvsp[-2].string));	delete (yyvsp[-2].string); }
-#line 1478 "src/parser.cpp"
+#line 1481 "src/parser.cpp"
     break;
 
   case 42: /* condition: IDENTIFIER E NUMBER  */
-#line 197 "sql.y"
+#line 200 "sql.y"
                                        { (yyval.condition)=new cond(E,(yyvsp[0].ival),*(yyvsp[-2].string)); 	delete (yyvsp[-2].string); }
-#line 1484 "src/parser.cpp"
+#line 1487 "src/parser.cpp"
     break;
 
   case 43: /* condition: OPEN_PAR expr CLOSE_PAR  */
-#line 198 "sql.y"
+#line 201 "sql.y"
                                           { (yyval.condition)=(yyvsp[-1].condition);}
-#line 1490 "src/parser.cpp"
+#line 1493 "src/parser.cpp"
     break;
 
   case 44: /* describe_stmt: DESCRIBE IDENTIFIER SEMICOLON  */
-#line 205 "sql.y"
+#line 208 "sql.y"
              {
                 if(check_table(*(yyvsp[-1].string))==true)
                 {
@@ -1504,11 +1507,11 @@ yyreduce:
                 else
                     yyerror("The Table Does not exists");
              }
-#line 1508 "src/parser.cpp"
+#line 1511 "src/parser.cpp"
     break;
 
   case 45: /* drop_stmt: DROP TABLE IDENTIFIER SEMICOLON  */
-#line 220 "sql.y"
+#line 223 "sql.y"
          {
                 if(check_table(*(yyvsp[-1].string))==true)
                     {
@@ -1519,11 +1522,11 @@ yyreduce:
                     yyerror("The Table Does not exists");
 
          }
-#line 1523 "src/parser.cpp"
+#line 1526 "src/parser.cpp"
     break;
 
   case 46: /* insert_stmt: INSERT INTO IDENTIFIER VALUES OPEN_PAR list_values CLOSE_PAR SEMICOLON  */
-#line 241 "sql.y"
+#line 244 "sql.y"
                                                                                    {
 				if(check_table(*(yyvsp[-5].string))==true)
                 {
@@ -1534,263 +1537,263 @@ yyreduce:
                     yyerror("The Table Does not exists");
 
 			}
-#line 1538 "src/parser.cpp"
+#line 1541 "src/parser.cpp"
     break;
 
   case 47: /* list_values: list_value  */
-#line 254 "sql.y"
+#line 257 "sql.y"
                        {
 				(yyval.literals_list)=new values_list();
 				(yyval.literals_list)->push_back((yyvsp[0].literal));
 			}
-#line 1547 "src/parser.cpp"
+#line 1550 "src/parser.cpp"
     break;
 
   case 48: /* list_values: list_values COMMA list_value  */
-#line 259 "sql.y"
+#line 262 "sql.y"
                         {
 				(yyvsp[-2].literals_list)->push_back((yyvsp[0].literal));
                 (yyval.literals_list)=(yyvsp[-2].literals_list);
 			}
-#line 1556 "src/parser.cpp"
+#line 1559 "src/parser.cpp"
     break;
 
   case 49: /* list_value: NUMBER  */
-#line 264 "sql.y"
+#line 267 "sql.y"
                    {
 				(yyval.literal)=new Values(std::to_string((yyvsp[0].ival)),INT);
 			}
-#line 1564 "src/parser.cpp"
+#line 1567 "src/parser.cpp"
     break;
 
   case 50: /* list_value: FLOAT  */
-#line 268 "sql.y"
+#line 271 "sql.y"
                         {
 				(yyval.literal)=new Values(std::to_string((yyvsp[0].fval)),DECIMAL);
 			}
-#line 1572 "src/parser.cpp"
+#line 1575 "src/parser.cpp"
     break;
 
   case 51: /* list_value: STRING  */
-#line 272 "sql.y"
+#line 275 "sql.y"
                         {
 				(yyval.literal)=new Values(*(yyvsp[0].string),CHAR);
 			}
-#line 1580 "src/parser.cpp"
+#line 1583 "src/parser.cpp"
     break;
 
   case 52: /* delete_stmt: DELETE FROM IDENTIFIER WHERE sexpr SEMICOLON  */
-#line 283 "sql.y"
+#line 286 "sql.y"
            {
 				if(check_table(*(yyvsp[-3].string))==true)
                         delete_from_table(*(yyvsp[-3].string),(yyvsp[-1].scond));
                 else
                     yyerror("The Table Does not exists");
            }
-#line 1591 "src/parser.cpp"
+#line 1594 "src/parser.cpp"
     break;
 
   case 53: /* sexpr: sor_expr  */
-#line 291 "sql.y"
+#line 294 "sql.y"
               {(yyval.scond)=(yyvsp[0].scond);}
-#line 1597 "src/parser.cpp"
+#line 1600 "src/parser.cpp"
     break;
 
   case 54: /* sor_expr: sand_expr  */
-#line 292 "sql.y"
+#line 295 "sql.y"
                    {  (yyval.scond)=(yyvsp[0].scond); }
-#line 1603 "src/parser.cpp"
+#line 1606 "src/parser.cpp"
     break;
 
   case 55: /* sor_expr: sor_expr OR sand_expr  */
-#line 293 "sql.y"
+#line 296 "sql.y"
                                 {
          (yyval.scond)=new select_cond();
          (yyval.scond)->left=(yyvsp[-2].scond);
          (yyval.scond)->right=(yyvsp[0].scond);
          (yyval.scond)->relation_type=OR;
         }
-#line 1614 "src/parser.cpp"
+#line 1617 "src/parser.cpp"
     break;
 
   case 56: /* sand_expr: sand_expr AND scond_b  */
-#line 301 "sql.y"
+#line 304 "sql.y"
         {  
             (yyval.scond)=new select_cond();
             (yyval.scond)->left =(yyvsp[-2].scond);
             (yyval.scond)->right=(yyvsp[0].scond);
             (yyval.scond)->relation_type=AND;
         }
-#line 1625 "src/parser.cpp"
+#line 1628 "src/parser.cpp"
     break;
 
   case 57: /* sand_expr: scond_b  */
-#line 308 "sql.y"
+#line 311 "sql.y"
         {
             (yyval.scond)=(yyvsp[0].scond);
         }
-#line 1633 "src/parser.cpp"
+#line 1636 "src/parser.cpp"
     break;
 
   case 58: /* scond_b: IDENTIFIER GE diff_value  */
-#line 312 "sql.y"
+#line 315 "sql.y"
                                  {
             (yyval.scond)=new select_cond(*(yyvsp[-2].string),GE,(yyvsp[0].literal)->data,(yyvsp[0].literal)->type);
             delete (yyvsp[0].literal);
 
         }
-#line 1643 "src/parser.cpp"
+#line 1646 "src/parser.cpp"
     break;
 
   case 59: /* scond_b: IDENTIFIER GT diff_value  */
-#line 317 "sql.y"
+#line 320 "sql.y"
                                  {
             (yyval.scond)=new select_cond(*(yyvsp[-2].string),GT,(yyvsp[0].literal)->data,(yyvsp[0].literal)->type);
             delete (yyvsp[0].literal);
 
         }
-#line 1653 "src/parser.cpp"
+#line 1656 "src/parser.cpp"
     break;
 
   case 60: /* scond_b: IDENTIFIER NE diff_value  */
-#line 322 "sql.y"
+#line 325 "sql.y"
                                  {
             (yyval.scond)=new select_cond(*(yyvsp[-2].string),NE,(yyvsp[0].literal)->data,(yyvsp[0].literal)->type);
             delete (yyvsp[0].literal);
         
         }
-#line 1663 "src/parser.cpp"
+#line 1666 "src/parser.cpp"
     break;
 
   case 61: /* scond_b: IDENTIFIER LT diff_value  */
-#line 327 "sql.y"
+#line 330 "sql.y"
                                  {
             (yyval.scond)=new select_cond(*(yyvsp[-2].string),LT,(yyvsp[0].literal)->data,(yyvsp[0].literal)->type);
             delete (yyvsp[0].literal);
         }
-#line 1672 "src/parser.cpp"
+#line 1675 "src/parser.cpp"
     break;
 
   case 62: /* scond_b: IDENTIFIER LE diff_value  */
-#line 331 "sql.y"
+#line 334 "sql.y"
                                  {
             (yyval.scond)=new select_cond(*(yyvsp[-2].string),LE,(yyvsp[0].literal)->data,(yyvsp[0].literal)->type);
             delete (yyvsp[0].literal);
         }
-#line 1681 "src/parser.cpp"
+#line 1684 "src/parser.cpp"
     break;
 
   case 63: /* scond_b: IDENTIFIER E diff_value  */
-#line 336 "sql.y"
+#line 339 "sql.y"
         {
             (yyval.scond)=new select_cond(*(yyvsp[-2].string),E,(yyvsp[0].literal)->data,(yyvsp[0].literal)->type);
             delete (yyvsp[0].literal);
         }
-#line 1690 "src/parser.cpp"
+#line 1693 "src/parser.cpp"
     break;
 
   case 64: /* scond_b: OPEN_PAR sexpr CLOSE_PAR  */
-#line 341 "sql.y"
+#line 344 "sql.y"
         {
             (yyval.scond)=(yyvsp[-1].scond);
         }
-#line 1698 "src/parser.cpp"
+#line 1701 "src/parser.cpp"
     break;
 
   case 65: /* diff_value: IDENTIFIER  */
-#line 346 "sql.y"
+#line 349 "sql.y"
           {  
                 (yyval.literal)=new Values();
                 (yyval.literal)->data=*(yyvsp[0].string);
                 (yyval.literal)->type=IDENTIFIER;
           }
-#line 1708 "src/parser.cpp"
+#line 1711 "src/parser.cpp"
     break;
 
   case 66: /* diff_value: diff_value_without_identifier  */
-#line 351 "sql.y"
+#line 354 "sql.y"
                                           { (yyval.literal)=(yyvsp[0].literal); }
-#line 1714 "src/parser.cpp"
+#line 1717 "src/parser.cpp"
     break;
 
   case 67: /* diff_value_without_identifier: STRING  */
-#line 355 "sql.y"
+#line 358 "sql.y"
           {  
                 (yyval.literal)=new Values();
                 (yyval.literal)->data=*(yyvsp[0].string);
                 (yyval.literal)->type=CHAR;    
           }
-#line 1724 "src/parser.cpp"
+#line 1727 "src/parser.cpp"
     break;
 
   case 68: /* diff_value_without_identifier: NUMBER  */
-#line 361 "sql.y"
+#line 364 "sql.y"
           {
 
                 (yyval.literal)=new Values();
                 (yyval.literal)->data=std::to_string((yyvsp[0].ival));
                 (yyval.literal)->type=INT;    
           }
-#line 1735 "src/parser.cpp"
+#line 1738 "src/parser.cpp"
     break;
 
   case 69: /* diff_value_without_identifier: FLOAT  */
-#line 368 "sql.y"
+#line 371 "sql.y"
           {
 
                 (yyval.literal)=new Values();
                 (yyval.literal)->data=std::to_string((yyvsp[0].fval));
                 (yyval.literal)->type=DECIMAL;    
           }
-#line 1746 "src/parser.cpp"
+#line 1749 "src/parser.cpp"
     break;
 
   case 70: /* update_stmt: UPDATE IDENTIFIER SET update_values WHERE sexpr SEMICOLON  */
-#line 381 "sql.y"
+#line 384 "sql.y"
            {
 				if(check_table(*(yyvsp[-5].string))==true)
                         update_table(*(yyvsp[-5].string),(yyvsp[-3].list_sets),(yyvsp[-1].scond));
                 else
                     yyerror("The Table Does not exists");
            }
-#line 1757 "src/parser.cpp"
+#line 1760 "src/parser.cpp"
     break;
 
   case 71: /* update_values: update_value  */
-#line 389 "sql.y"
+#line 392 "sql.y"
                            { (yyval.list_sets)=new update_sets; (yyval.list_sets)->push_back((yyvsp[0].update_set_val)); }
-#line 1763 "src/parser.cpp"
+#line 1766 "src/parser.cpp"
     break;
 
   case 72: /* update_values: update_values COMMA update_value  */
-#line 391 "sql.y"
+#line 394 "sql.y"
              {
                 (yyvsp[-2].list_sets)->push_back((yyvsp[0].update_set_val));
                 (yyval.list_sets)=(yyvsp[-2].list_sets);
              }
-#line 1772 "src/parser.cpp"
+#line 1775 "src/parser.cpp"
     break;
 
   case 73: /* update_value: IDENTIFIER E diff_value_without_identifier  */
-#line 397 "sql.y"
+#line 400 "sql.y"
             {
                 update_set * new_set= new update_set(*(yyvsp[-2].string),(yyvsp[0].literal)->data,(yyvsp[0].literal)->type);
                 delete (yyvsp[0].literal);
                 (yyval.update_set_val)=new_set;
             }
-#line 1782 "src/parser.cpp"
+#line 1785 "src/parser.cpp"
     break;
 
   case 74: /* select_stmt: SELECT columns FROM table_list WHERE sexpr SEMICOLON  */
-#line 410 "sql.y"
+#line 413 "sql.y"
            {
               select_from_tables((yyvsp[-5].string_array),(yyvsp[-3].string_array),(yyvsp[-1].scond));  
            }
-#line 1790 "src/parser.cpp"
+#line 1793 "src/parser.cpp"
     break;
 
   case 75: /* table_list: IDENTIFIER  */
-#line 415 "sql.y"
+#line 418 "sql.y"
           { 
                 std::vector<std::string*>* strings=new std::vector<std::string*>;
                 if(check_table(*(yyvsp[0].string)))
@@ -1799,11 +1802,11 @@ yyreduce:
                     yyerror("The table does not exists");
                 (yyval.string_array)=strings;
           }
-#line 1803 "src/parser.cpp"
+#line 1806 "src/parser.cpp"
     break;
 
   case 76: /* table_list: table_list COMMA IDENTIFIER  */
-#line 423 "sql.y"
+#line 426 "sql.y"
                                         {
                 if(check_table(*(yyvsp[0].string)))
                     (yyvsp[-2].string_array)->push_back((yyvsp[0].string));
@@ -1811,19 +1814,19 @@ yyreduce:
                     yyerror("The table does not exists");
                 (yyval.string_array)=(yyvsp[-2].string_array);
           }
-#line 1815 "src/parser.cpp"
+#line 1818 "src/parser.cpp"
     break;
 
   case 77: /* help_tables: HELP TABLES SEMICOLON  */
-#line 432 "sql.y"
+#line 435 "sql.y"
            {
                 help_tables();
            }
-#line 1823 "src/parser.cpp"
+#line 1826 "src/parser.cpp"
     break;
 
   case 79: /* cmd: CREATE TABLE  */
-#line 437 "sql.y"
+#line 440 "sql.y"
                  {
 		std::string print_string=	"The Create statement :\n"
 				"\tCREATE TABLE table_name ( \n"
@@ -1841,11 +1844,11 @@ yyreduce:
 				;
 		std::cout<<print_string<<std::endl;
    }
-#line 1845 "src/parser.cpp"
+#line 1848 "src/parser.cpp"
     break;
 
   case 80: /* cmd: DROP TABLE  */
-#line 455 "sql.y"
+#line 458 "sql.y"
    {
 		std::string print_string="\n\nDrop Table : \n"
 		"\tDROP TABLE table_name;\n"
@@ -1854,11 +1857,11 @@ yyreduce:
 		"If Commit is passed after this command the table will be dropped Permanently\n";
 		std::cout<<print_string<<std::endl;
    }
-#line 1858 "src/parser.cpp"
+#line 1861 "src/parser.cpp"
     break;
 
   case 81: /* cmd: SELECT  */
-#line 464 "sql.y"
+#line 467 "sql.y"
    {
 		std::string print_string="\n\nThe Select Statement : \n"
 		"\t\tSELECT \n"
@@ -1874,11 +1877,11 @@ yyreduce:
 		"For the conditions , check HELP SELECT CONDITIONS\n";
 		std::cout<<print_string<<std::endl;
    }
-#line 1878 "src/parser.cpp"
+#line 1881 "src/parser.cpp"
     break;
 
   case 82: /* cmd: INSERT  */
-#line 480 "sql.y"
+#line 483 "sql.y"
    {
 		std::string print_string="\n\nThe Insert Statement : \n"
 		"\t\tINSERT INTO\n"
@@ -1893,11 +1896,11 @@ yyreduce:
 		"is followed by insert.\n";
 		std::cout<<print_string<<std::endl;
    }
-#line 1897 "src/parser.cpp"
+#line 1900 "src/parser.cpp"
     break;
 
   case 83: /* cmd: DELETE  */
-#line 495 "sql.y"
+#line 498 "sql.y"
    {
 		std::string print_string="\n\nThe Delete Statement : \n"
 		"\t\tDELETE FROM\n"
@@ -1908,11 +1911,11 @@ yyreduce:
 		"For condition check HELP SELECT CONDITIONS.\n";
 		std::cout<<print_string<<std::endl;
    }
-#line 1912 "src/parser.cpp"
+#line 1915 "src/parser.cpp"
     break;
 
   case 84: /* cmd: UPDATE  */
-#line 506 "sql.y"
+#line 509 "sql.y"
    {
 		std::string print_string="\n\nThe Update statement : \n"
 		"\t\tUPDATE table_name\n"
@@ -1924,11 +1927,11 @@ yyreduce:
 		"For condition check HELP SELECT CONDITIONS.\n";
 		std::cout<<print_string<<std::endl;
    }
-#line 1928 "src/parser.cpp"
+#line 1931 "src/parser.cpp"
     break;
 
   case 85: /* cmd: CONDITIONS  */
-#line 518 "sql.y"
+#line 521 "sql.y"
    {
 		std::string print_string="\n\nThe Conditions :\n"
 		"\t\toperand1 operator operand2\n"
@@ -1937,19 +1940,20 @@ yyreduce:
 		"The operand2 can be column name or string literal , decimal or integer\n";
 		std::cout<<print_string<<std::endl;
    }
-#line 1941 "src/parser.cpp"
+#line 1944 "src/parser.cpp"
     break;
 
   case 86: /* quit_stmt: QUIT SEMICOLON  */
-#line 528 "sql.y"
+#line 531 "sql.y"
                  {
 		 	save_to_buffer();
+			exit(0);
 		 }
-#line 1949 "src/parser.cpp"
+#line 1953 "src/parser.cpp"
     break;
 
 
-#line 1953 "src/parser.cpp"
+#line 1957 "src/parser.cpp"
 
       default: break;
     }
@@ -2142,7 +2146,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 535 "sql.y"
+#line 539 "sql.y"
 
 
 
