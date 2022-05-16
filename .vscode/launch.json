@@ -12,7 +12,7 @@
                     "program": "D:\\Aditya\\Documents\\Sem6\\dbms\\CourseProject\\basic_SQL_compiler\\sql.exe",
                     "args": [
                         "test.txt"
-                        ]                    ],
+                        ]                   ,
                     "cwd": "D:\\Aditya\\Documents\\Sem6\\dbms\\CourseProject\\basic_SQL_compiler",
                     "MIMode": "gdb"
                 }

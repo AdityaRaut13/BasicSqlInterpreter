@@ -911,5 +911,3 @@ void delete_from_table(std::string table_name, select_cond *conditions)
 	//file_path += table_name;
 	//std::rename(BUFFER0, file_path.c_str());
 }
-
-

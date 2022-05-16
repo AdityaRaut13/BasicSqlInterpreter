@@ -1,6 +1,6 @@
-#line 2 "src/tokens.cpp"
+#line 1 "src\\tokens.cpp"
 
-#line 4 "src/tokens.cpp"
+#line 3 "src\\tokens.cpp"
 
 #define  YY_INT_ALIGNED short int
 
@@ -531,8 +531,8 @@ char *yytext;
 	#include "node.h"
 	#include "parser.hpp"
 
-#line 535 "src/tokens.cpp"
-#line 536 "src/tokens.cpp"
+#line 534 "src\\tokens.cpp"
+#line 535 "src\\tokens.cpp"
 
 #define INITIAL 0
 
@@ -543,7 +543,7 @@ char *yytext;
  */
 #include <unistd.h>
 #endif
-
+    
 #ifndef YY_EXTRA_TYPE
 #define YY_EXTRA_TYPE void *
 #endif
@@ -753,7 +753,7 @@ YY_DECL
 
 
 
-#line 757 "src/tokens.cpp"
+#line 756 "src\\tokens.cpp"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1007,7 +1007,7 @@ YY_RULE_SETUP
 #line 66 "sql.l"
 ECHO;
 	YY_BREAK
-#line 1011 "src/tokens.cpp"
+#line 1010 "src\\tokens.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 

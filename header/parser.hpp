@@ -1,22 +1,21 @@
-/* A Bison parser, made by GNU Bison 3.8.2.  */
+/* A Bison parser, made by GNU Bison 2.7.  */
 
 /* Bison interface for Yacc-like parsers in C
-
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
-   Inc.
-
+   
+      Copyright (C) 1984, 1989-1990, 2000-2012 Free Software Foundation, Inc.
+   
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-
+   
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-
+   
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -27,17 +26,13 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-
+   
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
-   especially those whose name start with YY_ or yy_.  They are
-   private implementation details that can be changed or removed.  */
-
 #ifndef YY_YY_HEADER_PARSER_HPP_INCLUDED
 # define YY_YY_HEADER_PARSER_HPP_INCLUDED
-/* Debug traces.  */
+/* Enabling traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
 #endif
@@ -45,57 +40,54 @@
 extern int yydebug;
 #endif
 
-/* Token kinds.  */
+/* Tokens.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
-  enum yytokentype
-  {
-    YYEMPTY = -2,
-    YYEOF = 0,                     /* "end of file"  */
-    YYerror = 256,                 /* error  */
-    YYUNDEF = 257,                 /* "invalid token"  */
-    CREATE = 258,                  /* CREATE  */
-    TABLE = 259,                   /* TABLE  */
-    CHECK = 260,                   /* CHECK  */
-    PRIMARY = 261,                 /* PRIMARY  */
-    KEY = 262,                     /* KEY  */
-    FOREIGN = 263,                 /* FOREIGN  */
-    REFERENCES = 264,              /* REFERENCES  */
-    CHAR = 265,                    /* CHAR  */
-    INT = 266,                     /* INT  */
-    DECIMAL = 267,                 /* DECIMAL  */
-    OPEN_PAR = 268,                /* OPEN_PAR  */
-    CLOSE_PAR = 269,               /* CLOSE_PAR  */
-    SEMICOLON = 270,               /* SEMICOLON  */
-    COMMA = 271,                   /* COMMA  */
-    OR = 272,                      /* OR  */
-    AND = 273,                     /* AND  */
-    GE = 274,                      /* GE  */
-    GT = 275,                      /* GT  */
-    LE = 276,                      /* LE  */
-    LT = 277,                      /* LT  */
-    E = 278,                       /* E  */
-    NE = 279,                      /* NE  */
-    DESCRIBE = 280,                /* DESCRIBE  */
-    DROP = 281,                    /* DROP  */
-    INSERT = 282,                  /* INSERT  */
-    INTO = 283,                    /* INTO  */
-    VALUES = 284,                  /* VALUES  */
-    DELETE = 285,                  /* DELETE  */
-    FROM = 286,                    /* FROM  */
-    WHERE = 287,                   /* WHERE  */
-    IDENTIFIER = 288,              /* IDENTIFIER  */
-    STRING = 289,                  /* STRING  */
-    NUMBER = 290,                  /* NUMBER  */
-    FLOAT = 291                    /* FLOAT  */
-  };
-  typedef enum yytokentype yytoken_kind_t;
+   /* Put the tokens into the symbol table, so that GDB and other debuggers
+      know about them.  */
+   enum yytokentype {
+     CREATE = 258,
+     TABLE = 259,
+     CHECK = 260,
+     PRIMARY = 261,
+     KEY = 262,
+     FOREIGN = 263,
+     REFERENCES = 264,
+     CHAR = 265,
+     INT = 266,
+     DECIMAL = 267,
+     OPEN_PAR = 268,
+     CLOSE_PAR = 269,
+     SEMICOLON = 270,
+     COMMA = 271,
+     OR = 272,
+     AND = 273,
+     GE = 274,
+     GT = 275,
+     LE = 276,
+     LT = 277,
+     E = 278,
+     NE = 279,
+     DESCRIBE = 280,
+     DROP = 281,
+     INSERT = 282,
+     INTO = 283,
+     VALUES = 284,
+     DELETE = 285,
+     FROM = 286,
+     WHERE = 287,
+     IDENTIFIER = 288,
+     STRING = 289,
+     NUMBER = 290,
+     FLOAT = 291
+   };
 #endif
 
-/* Value type.  */
+
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-union YYSTYPE
+typedef union YYSTYPE
 {
+/* Line 2058 of yacc.c  */
 #line 13 "sql.y"
 
 	std::string* string;
@@ -111,19 +103,29 @@ union YYSTYPE
     select_cond* scond;
     float fval;
 
-#line 115 "header/parser.hpp"
 
-};
-typedef union YYSTYPE YYSTYPE;
+/* Line 2058 of yacc.c  */
+#line 109 "header\\parser.hpp"
+} YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
+# define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 #endif
 
-
 extern YYSTYPE yylval;
 
-
+#ifdef YYPARSE_PARAM
+#if defined __STDC__ || defined __cplusplus
+int yyparse (void *YYPARSE_PARAM);
+#else
+int yyparse ();
+#endif
+#else /* ! YYPARSE_PARAM */
+#if defined __STDC__ || defined __cplusplus
 int yyparse (void);
-
+#else
+int yyparse ();
+#endif
+#endif /* ! YYPARSE_PARAM */
 
 #endif /* !YY_YY_HEADER_PARSER_HPP_INCLUDED  */
