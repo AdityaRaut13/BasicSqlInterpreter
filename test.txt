@@ -8,9 +8,9 @@ CREATE TABLE student
 (
     id INT(10) CHECK id > 0 AND id<100,
     name CHAR(20),
-    departno INT(10),
+    departno_s INT(10),
     PRIMARY KEY (id),
-    FOREIGN KEY (departno) REFERENCES department(departno)
+    FOREIGN KEY (departno_s) REFERENCES department(departno)
 );
 
 INSERT INTO department VALUES (11,'Comp');  
@@ -18,20 +18,25 @@ INSERT INTO department VALUES (12,'ENTC');
 INSERT INTO department VALUES (13,'Instru');  
 INSERT INTO department VALUES (14,'Mech');  
 
-DELETE FROM department WHERE departname='Mech';
 
 
+INSERT INTO student VALUES (1,'Ramesh',11);
+INSERT INTO student VALUES (2,'Suresh',11);
+INSERT INTO student VALUES (3,'Raju',11);
+INSERT INTO student VALUES (4,'Bheem',12);
+INSERT INTO student VALUES (5,'Prakash',12);
+INSERT INTO student VALUES (6,'Yash',12);
+
+SELECT id,name,departname FROM student,department WHERE departno_s=departno;
+
+UPDATE student SET departno_s=13 WHERE name='Prakash';
+UPDATE student SET name='Kailash' WHERE name='Raju';
+
+SELECT id,name,departno_s FROM student WHERE id>0;
+
+DELETE FROM student WHERE id=6;
 
 
+SELECT id,name,departno_s FROM student WHERE id>0;
 
-
-
-
-
-
-
-
-
-
-
-
+QUIT;

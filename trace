@@ -10,101 +10,123 @@ Grammar
     5          | drop_stmt
     6          | insert_stmt
     7          | delete_stmt
+    8          | update_stmt
+    9          | select_stmt
+   10          | help_tables
+   11          | help_cmd
+   12          | quit_stmt
 
-    8 create_stmt: CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON
-    9            | CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key CLOSE_PAR SEMICOLON
+   13 create_stmt: CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON
+   14            | CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key CLOSE_PAR SEMICOLON
 
-   10 primary_key: PRIMARY KEY OPEN_PAR columns CLOSE_PAR
+   15 primary_key: PRIMARY KEY OPEN_PAR columns CLOSE_PAR
 
-   11 foreign_keys: foreign_key
-   12             | foreign_keys COMMA foreign_key
+   16 foreign_keys: foreign_key
+   17             | foreign_keys COMMA foreign_key
 
-   13 foreign_key: FOREIGN KEY OPEN_PAR column CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR column CLOSE_PAR
+   18 foreign_key: FOREIGN KEY OPEN_PAR column CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR column CLOSE_PAR
 
-   14 columns: column
-   15        | columns COMMA column
+   19 columns: column
+   20        | columns COMMA column
 
-   16 column: IDENTIFIER
+   21 column: IDENTIFIER
 
-   17 definitions: definition
-   18            | definitions COMMA definition
+   22 definitions: definition
+   23            | definitions COMMA definition
 
-   19 definition: IDENTIFIER attr_type
-   20           | IDENTIFIER attr_type CHECK expr
+   24 definition: IDENTIFIER attr_type
+   25           | IDENTIFIER attr_type CHECK expr
 
-   21 attr_type: CHAR OPEN_PAR NUMBER CLOSE_PAR
-   22          | INT OPEN_PAR NUMBER CLOSE_PAR
-   23          | DECIMAL OPEN_PAR NUMBER CLOSE_PAR
-   24          | INT
-   25          | DECIMAL
+   26 attr_type: CHAR OPEN_PAR NUMBER CLOSE_PAR
+   27          | INT OPEN_PAR NUMBER CLOSE_PAR
+   28          | DECIMAL OPEN_PAR NUMBER CLOSE_PAR
+   29          | INT
+   30          | DECIMAL
 
-   26 expr: or_expr
+   31 expr: or_expr
 
-   27 or_expr: and_expr
-   28        | or_expr OR and_expr
+   32 or_expr: and_expr
+   33        | or_expr OR and_expr
 
-   29 and_expr: and_expr AND condition
-   30         | condition
+   34 and_expr: and_expr AND condition
+   35         | condition
 
-   31 condition: IDENTIFIER GE NUMBER
-   32          | IDENTIFIER GT NUMBER
-   33          | IDENTIFIER NE NUMBER
-   34          | IDENTIFIER LT NUMBER
-   35          | IDENTIFIER LE NUMBER
-   36          | IDENTIFIER E NUMBER
-   37          | OPEN_PAR expr CLOSE_PAR
+   36 condition: IDENTIFIER GE NUMBER
+   37          | IDENTIFIER GT NUMBER
+   38          | IDENTIFIER NE NUMBER
+   39          | IDENTIFIER LT NUMBER
+   40          | IDENTIFIER LE NUMBER
+   41          | IDENTIFIER E NUMBER
+   42          | OPEN_PAR expr CLOSE_PAR
 
-   38 describe_stmt: DESCRIBE IDENTIFIER SEMICOLON
+   43 describe_stmt: DESCRIBE IDENTIFIER SEMICOLON
 
-   39 drop_stmt: DROP TABLE IDENTIFIER SEMICOLON
+   44 drop_stmt: DROP TABLE IDENTIFIER SEMICOLON
 
-   40 insert_stmt: INSERT INTO IDENTIFIER VALUES OPEN_PAR list_values CLOSE_PAR SEMICOLON
+   45 insert_stmt: INSERT INTO IDENTIFIER VALUES OPEN_PAR list_values CLOSE_PAR SEMICOLON
 
-   41 list_values: list_value
-   42            | list_values COMMA list_value
+   46 list_values: list_value
+   47            | list_values COMMA list_value
 
-   43 list_value: NUMBER
-   44           | FLOAT
-   45           | STRING
+   48 list_value: NUMBER
+   49           | FLOAT
+   50           | STRING
 
-   46 delete_stmt: DELETE FROM IDENTIFIER WHERE sexpr SEMICOLON
+   51 delete_stmt: DELETE FROM IDENTIFIER WHERE sexpr SEMICOLON
 
-   47 sexpr: sor_expr
+   52 sexpr: sor_expr
 
-   48 sor_expr: sand_expr
-   49         | sor_expr OR sand_expr
+   53 sor_expr: sand_expr
+   54         | sor_expr OR sand_expr
 
-   50 sand_expr: sand_expr AND scond_b
-   51          | scond_b
+   55 sand_expr: sand_expr AND scond_b
+   56          | scond_b
 
-   52 scond_b: IDENTIFIER GE NUMBER
-   53        | IDENTIFIER GT NUMBER
-   54        | IDENTIFIER NE NUMBER
-   55        | IDENTIFIER LT NUMBER
-   56        | IDENTIFIER LE NUMBER
-   57        | IDENTIFIER E NUMBER
-   58        | IDENTIFIER GE FLOAT
-   59        | IDENTIFIER GT FLOAT
-   60        | IDENTIFIER NE FLOAT
-   61        | IDENTIFIER LT FLOAT
-   62        | IDENTIFIER LE FLOAT
-   63        | IDENTIFIER E FLOAT
-   64        | IDENTIFIER GE STRING
-   65        | IDENTIFIER GT STRING
-   66        | IDENTIFIER NE STRING
-   67        | IDENTIFIER LT STRING
-   68        | IDENTIFIER LE STRING
-   69        | IDENTIFIER E STRING
-   70        | IDENTIFIER GE IDENTIFIER
-   71        | IDENTIFIER GT IDENTIFIER
-   72        | IDENTIFIER NE IDENTIFIER
-   73        | IDENTIFIER LT IDENTIFIER
-   74        | IDENTIFIER LE IDENTIFIER
-   75        | IDENTIFIER E IDENTIFIER
+   57 scond_b: IDENTIFIER GE diff_value
+   58        | IDENTIFIER GT diff_value
+   59        | IDENTIFIER NE diff_value
+   60        | IDENTIFIER LT diff_value
+   61        | IDENTIFIER LE diff_value
+   62        | IDENTIFIER E diff_value
+   63        | OPEN_PAR sexpr CLOSE_PAR
+
+   64 diff_value: IDENTIFIER
+   65           | diff_value_without_identifier
+
+   66 diff_value_without_identifier: STRING
+   67                              | NUMBER
+   68                              | FLOAT
+
+   69 update_stmt: UPDATE IDENTIFIER SET update_values WHERE sexpr SEMICOLON
+
+   70 update_values: update_value
+   71              | update_values COMMA update_value
+
+   72 update_value: IDENTIFIER E diff_value_without_identifier
+
+   73 select_stmt: SELECT columns FROM table_list WHERE sexpr SEMICOLON
+
+   74 table_list: IDENTIFIER
+   75           | table_list COMMA IDENTIFIER
+
+   76 help_tables: HELP TABLES SEMICOLON
+
+   77 help_cmd: HELP cmd
+
+   78 cmd: CREATE TABLE
+   79    | DROP TABLE
+   80    | SELECT
+   81    | INSERT
+   82    | DELETE
+   83    | UPDATE
+   84    | CONDITIONS
+
+   85 quit_stmt: QUIT SEMICOLON
 
 
 Terminals, with rules where they appear
 
+<<<<<<< HEAD
 $end (0) 0
 error (256)
 CREATE (258) 8 9
@@ -143,10 +165,56 @@ IDENTIFIER (288) 8 9 13 16 19 20 31 32 33 34 35 36 38 39 40 46 52 53
 STRING (289) 45 64 65 66 67 68 69
 NUMBER (290) 21 22 23 31 32 33 34 35 36 43 52 53 54 55 56 57
 FLOAT (291) 44 58 59 60 61 62 63
+=======
+    $end (0) 0
+    error (256)
+    CREATE (258) 13 14 78
+    TABLE (259) 13 14 44 78 79
+    CHECK (260) 25
+    PRIMARY (261) 15
+    KEY (262) 15 18
+    FOREIGN (263) 18
+    REFERENCES (264) 18
+    CHAR (265) 26
+    INT (266) 27 29
+    DECIMAL (267) 28 30
+    OPEN_PAR (268) 13 14 15 18 26 27 28 42 45 63
+    CLOSE_PAR (269) 13 14 15 18 26 27 28 42 45 63
+    SEMICOLON (270) 13 14 43 44 45 51 69 73 76 85
+    COMMA (271) 13 14 17 20 23 47 71 75
+    OR (272) 33 54
+    AND (273) 34 55
+    GE (274) 36 57
+    GT (275) 37 58
+    LE (276) 40 61
+    LT (277) 39 60
+    E (278) 41 62 72
+    NE (279) 38 59
+    DESCRIBE (280) 43
+    DROP (281) 44 79
+    INSERT (282) 45 81
+    INTO (283) 45
+    VALUES (284) 45
+    DELETE (285) 51 82
+    FROM (286) 51 73
+    WHERE (287) 51 69 73
+    UPDATE (288) 69 83
+    SET (289) 69
+    SELECT (290) 73 80
+    HELP (291) 76 77
+    TABLES (292) 76
+    QUIT (293) 85
+    CONDITIONS (294) 84
+    IDENTIFIER <string> (295) 13 14 18 21 24 25 36 37 38 39 40 41 43 44 45 51 57 58 59 60 61 62 64 69 72 74 75
+    STRING <string> (296) 50 66
+    NUMBER <ival> (297) 26 27 28 36 37 38 39 40 41 48 67
+    FLOAT <fval> (298) 49 68
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
 
 Nonterminals, with rules where they appear
 
+<<<<<<< HEAD
 $accept (37)
     on left: 0
 statements (38)
@@ -200,10 +268,123 @@ sand_expr (61)
 scond_b (62)
     on left: 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69
     70 71 72 73 74 75, on right: 50 51
+=======
+    $accept (44)
+        on left: 0
+    statements (45)
+        on left: 1 2
+        on right: 0 2
+    statement (46)
+        on left: 3 4 5 6 7 8 9 10 11 12
+        on right: 1 2
+    create_stmt (47)
+        on left: 13 14
+        on right: 3
+    primary_key <string_array> (48)
+        on left: 15
+        on right: 13 14
+    foreign_keys <refer_list> (49)
+        on left: 16 17
+        on right: 13 17
+    foreign_key <refer> (50)
+        on left: 18
+        on right: 16 17
+    columns <string_array> (51)
+        on left: 19 20
+        on right: 15 20 73
+    column <string> (52)
+        on left: 21
+        on right: 18 19 20
+    definitions <cols> (53)
+        on left: 22 23
+        on right: 13 14 23
+    definition <column> (54)
+        on left: 24 25
+        on right: 22 23
+    attr_type <column> (55)
+        on left: 26 27 28 29 30
+        on right: 24 25
+    expr <condition> (56)
+        on left: 31
+        on right: 25 42
+    or_expr <condition> (57)
+        on left: 32 33
+        on right: 31 33
+    and_expr <condition> (58)
+        on left: 34 35
+        on right: 32 33 34
+    condition <condition> (59)
+        on left: 36 37 38 39 40 41 42
+        on right: 34 35
+    describe_stmt (60)
+        on left: 43
+        on right: 4
+    drop_stmt (61)
+        on left: 44
+        on right: 5
+    insert_stmt (62)
+        on left: 45
+        on right: 6
+    list_values <literals_list> (63)
+        on left: 46 47
+        on right: 45 47
+    list_value <literal> (64)
+        on left: 48 49 50
+        on right: 46 47
+    delete_stmt (65)
+        on left: 51
+        on right: 7
+    sexpr <scond> (66)
+        on left: 52
+        on right: 51 63 69 73
+    sor_expr <scond> (67)
+        on left: 53 54
+        on right: 52 54
+    sand_expr <scond> (68)
+        on left: 55 56
+        on right: 53 54 55
+    scond_b <scond> (69)
+        on left: 57 58 59 60 61 62 63
+        on right: 55 56
+    diff_value <literal> (70)
+        on left: 64 65
+        on right: 57 58 59 60 61 62
+    diff_value_without_identifier <literal> (71)
+        on left: 66 67 68
+        on right: 65 72
+    update_stmt (72)
+        on left: 69
+        on right: 8
+    update_values <list_sets> (73)
+        on left: 70 71
+        on right: 69 71
+    update_value <update_set_val> (74)
+        on left: 72
+        on right: 70 71
+    select_stmt (75)
+        on left: 73
+        on right: 9
+    table_list <string_array> (76)
+        on left: 74 75
+        on right: 73 75
+    help_tables (77)
+        on left: 76
+        on right: 10
+    help_cmd (78)
+        on left: 77
+        on right: 11
+    cmd (79)
+        on left: 78 79 80 81 82 83 84
+        on right: 77
+    quit_stmt (80)
+        on left: 85
+        on right: 12
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
 
 State 0
 
+<<<<<<< HEAD
     0 $accept: . statements $end
     1 statements: . statement
     2           | . statements statement
@@ -218,60 +399,117 @@ State 0
    39 drop_stmt: . DROP TABLE IDENTIFIER SEMICOLON
    40 insert_stmt: . INSERT INTO IDENTIFIER VALUES OPEN_PAR list_values CLOSE_PAR SEMICOLON
    46 delete_stmt: . DELETE FROM IDENTIFIER WHERE sexpr SEMICOLON
+=======
+    0 $accept: • statements $end
+    1 statements: • statement
+    2           | • statements statement
+    3 statement: • create_stmt
+    4          | • describe_stmt
+    5          | • drop_stmt
+    6          | • insert_stmt
+    7          | • delete_stmt
+    8          | • update_stmt
+    9          | • select_stmt
+   10          | • help_tables
+   11          | • help_cmd
+   12          | • quit_stmt
+   13 create_stmt: • CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON
+   14            | • CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key CLOSE_PAR SEMICOLON
+   43 describe_stmt: • DESCRIBE IDENTIFIER SEMICOLON
+   44 drop_stmt: • DROP TABLE IDENTIFIER SEMICOLON
+   45 insert_stmt: • INSERT INTO IDENTIFIER VALUES OPEN_PAR list_values CLOSE_PAR SEMICOLON
+   51 delete_stmt: • DELETE FROM IDENTIFIER WHERE sexpr SEMICOLON
+   69 update_stmt: • UPDATE IDENTIFIER SET update_values WHERE sexpr SEMICOLON
+   73 select_stmt: • SELECT columns FROM table_list WHERE sexpr SEMICOLON
+   76 help_tables: • HELP TABLES SEMICOLON
+   77 help_cmd: • HELP cmd
+   85 quit_stmt: • QUIT SEMICOLON
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
     CREATE    shift, and go to state 1
     DESCRIBE  shift, and go to state 2
     DROP      shift, and go to state 3
     INSERT    shift, and go to state 4
     DELETE    shift, and go to state 5
+    UPDATE    shift, and go to state 6
+    SELECT    shift, and go to state 7
+    HELP      shift, and go to state 8
+    QUIT      shift, and go to state 9
 
-    statements     go to state 6
-    statement      go to state 7
-    create_stmt    go to state 8
-    describe_stmt  go to state 9
-    drop_stmt      go to state 10
-    insert_stmt    go to state 11
-    delete_stmt    go to state 12
+    statements     go to state 10
+    statement      go to state 11
+    create_stmt    go to state 12
+    describe_stmt  go to state 13
+    drop_stmt      go to state 14
+    insert_stmt    go to state 15
+    delete_stmt    go to state 16
+    update_stmt    go to state 17
+    select_stmt    go to state 18
+    help_tables    go to state 19
+    help_cmd       go to state 20
+    quit_stmt      go to state 21
 
 
 State 1
 
+<<<<<<< HEAD
     8 create_stmt: CREATE . TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON
     9            | CREATE . TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key CLOSE_PAR SEMICOLON
+=======
+   13 create_stmt: CREATE • TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON
+   14            | CREATE • TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key CLOSE_PAR SEMICOLON
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    TABLE  shift, and go to state 13
+    TABLE  shift, and go to state 22
 
 
 State 2
 
+<<<<<<< HEAD
    38 describe_stmt: DESCRIBE . IDENTIFIER SEMICOLON
+=======
+   43 describe_stmt: DESCRIBE • IDENTIFIER SEMICOLON
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    IDENTIFIER  shift, and go to state 14
+    IDENTIFIER  shift, and go to state 23
 
 
 State 3
 
+<<<<<<< HEAD
    39 drop_stmt: DROP . TABLE IDENTIFIER SEMICOLON
+=======
+   44 drop_stmt: DROP • TABLE IDENTIFIER SEMICOLON
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    TABLE  shift, and go to state 15
+    TABLE  shift, and go to state 24
 
 
 State 4
 
+<<<<<<< HEAD
    40 insert_stmt: INSERT . INTO IDENTIFIER VALUES OPEN_PAR list_values CLOSE_PAR SEMICOLON
+=======
+   45 insert_stmt: INSERT • INTO IDENTIFIER VALUES OPEN_PAR list_values CLOSE_PAR SEMICOLON
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    INTO  shift, and go to state 16
+    INTO  shift, and go to state 25
 
 
 State 5
 
+<<<<<<< HEAD
    46 delete_stmt: DELETE . FROM IDENTIFIER WHERE sexpr SEMICOLON
+=======
+   51 delete_stmt: DELETE • FROM IDENTIFIER WHERE sexpr SEMICOLON
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    FROM  shift, and go to state 17
+    FROM  shift, and go to state 26
 
 
 State 6
 
+<<<<<<< HEAD
     0 $accept: statements . $end
     2 statements: statements . statement
     3 statement: . create_stmt
@@ -285,64 +523,150 @@ State 6
    39 drop_stmt: . DROP TABLE IDENTIFIER SEMICOLON
    40 insert_stmt: . INSERT INTO IDENTIFIER VALUES OPEN_PAR list_values CLOSE_PAR SEMICOLON
    46 delete_stmt: . DELETE FROM IDENTIFIER WHERE sexpr SEMICOLON
+=======
+   69 update_stmt: UPDATE • IDENTIFIER SET update_values WHERE sexpr SEMICOLON
 
-    $end      shift, and go to state 18
+    IDENTIFIER  shift, and go to state 27
+
+
+State 7
+
+   19 columns: • column
+   20        | • columns COMMA column
+   21 column: • IDENTIFIER
+   73 select_stmt: SELECT • columns FROM table_list WHERE sexpr SEMICOLON
+
+    IDENTIFIER  shift, and go to state 28
+
+    columns  go to state 29
+    column   go to state 30
+
+
+State 8
+
+   76 help_tables: HELP • TABLES SEMICOLON
+   77 help_cmd: HELP • cmd
+   78 cmd: • CREATE TABLE
+   79    | • DROP TABLE
+   80    | • SELECT
+   81    | • INSERT
+   82    | • DELETE
+   83    | • UPDATE
+   84    | • CONDITIONS
+
+    CREATE      shift, and go to state 31
+    DROP        shift, and go to state 32
+    INSERT      shift, and go to state 33
+    DELETE      shift, and go to state 34
+    UPDATE      shift, and go to state 35
+    SELECT      shift, and go to state 36
+    TABLES      shift, and go to state 37
+    CONDITIONS  shift, and go to state 38
+
+    cmd  go to state 39
+
+
+State 9
+
+   85 quit_stmt: QUIT • SEMICOLON
+
+    SEMICOLON  shift, and go to state 40
+
+
+State 10
+
+    0 $accept: statements • $end
+    2 statements: statements • statement
+    3 statement: • create_stmt
+    4          | • describe_stmt
+    5          | • drop_stmt
+    6          | • insert_stmt
+    7          | • delete_stmt
+    8          | • update_stmt
+    9          | • select_stmt
+   10          | • help_tables
+   11          | • help_cmd
+   12          | • quit_stmt
+   13 create_stmt: • CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON
+   14            | • CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key CLOSE_PAR SEMICOLON
+   43 describe_stmt: • DESCRIBE IDENTIFIER SEMICOLON
+   44 drop_stmt: • DROP TABLE IDENTIFIER SEMICOLON
+   45 insert_stmt: • INSERT INTO IDENTIFIER VALUES OPEN_PAR list_values CLOSE_PAR SEMICOLON
+   51 delete_stmt: • DELETE FROM IDENTIFIER WHERE sexpr SEMICOLON
+   69 update_stmt: • UPDATE IDENTIFIER SET update_values WHERE sexpr SEMICOLON
+   73 select_stmt: • SELECT columns FROM table_list WHERE sexpr SEMICOLON
+   76 help_tables: • HELP TABLES SEMICOLON
+   77 help_cmd: • HELP cmd
+   85 quit_stmt: • QUIT SEMICOLON
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
+
+    $end      shift, and go to state 41
     CREATE    shift, and go to state 1
     DESCRIBE  shift, and go to state 2
     DROP      shift, and go to state 3
     INSERT    shift, and go to state 4
     DELETE    shift, and go to state 5
+    UPDATE    shift, and go to state 6
+    SELECT    shift, and go to state 7
+    HELP      shift, and go to state 8
+    QUIT      shift, and go to state 9
 
-    statement      go to state 19
-    create_stmt    go to state 8
-    describe_stmt  go to state 9
-    drop_stmt      go to state 10
-    insert_stmt    go to state 11
-    delete_stmt    go to state 12
+    statement      go to state 42
+    create_stmt    go to state 12
+    describe_stmt  go to state 13
+    drop_stmt      go to state 14
+    insert_stmt    go to state 15
+    delete_stmt    go to state 16
+    update_stmt    go to state 17
+    select_stmt    go to state 18
+    help_tables    go to state 19
+    help_cmd       go to state 20
+    quit_stmt      go to state 21
 
 
-State 7
+State 11
 
     1 statements: statement .
 
     $default  reduce using rule 1 (statements)
 
 
-State 8
+State 12
 
     3 statement: create_stmt .
 
     $default  reduce using rule 3 (statement)
 
 
-State 9
+State 13
 
     4 statement: describe_stmt .
 
     $default  reduce using rule 4 (statement)
 
 
-State 10
+State 14
 
     5 statement: drop_stmt .
 
     $default  reduce using rule 5 (statement)
 
 
-State 11
+State 15
 
     6 statement: insert_stmt .
 
     $default  reduce using rule 6 (statement)
 
 
-State 12
+State 16
 
     7 statement: delete_stmt .
 
     $default  reduce using rule 7 (statement)
 
 
+<<<<<<< HEAD
 State 13
 
     8 create_stmt: CREATE TABLE . IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON
@@ -375,24 +699,198 @@ State 16
 State 17
 
    46 delete_stmt: DELETE FROM . IDENTIFIER WHERE sexpr SEMICOLON
+=======
+State 17
 
-    IDENTIFIER  shift, and go to state 24
+    8 statement: update_stmt •
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
+
+    $default  reduce using rule 8 (statement)
 
 
 State 18
 
+<<<<<<< HEAD
     0 $accept: statements $end .
+=======
+    9 statement: select_stmt •
+
+    $default  reduce using rule 9 (statement)
+
+
+State 19
+
+   10 statement: help_tables •
+
+    $default  reduce using rule 10 (statement)
+
+
+State 20
+
+   11 statement: help_cmd •
+
+    $default  reduce using rule 11 (statement)
+
+
+State 21
+
+   12 statement: quit_stmt •
+
+    $default  reduce using rule 12 (statement)
+
+
+State 22
+
+   13 create_stmt: CREATE TABLE • IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON
+   14            | CREATE TABLE • IDENTIFIER OPEN_PAR definitions COMMA primary_key CLOSE_PAR SEMICOLON
+
+    IDENTIFIER  shift, and go to state 43
+
+
+State 23
+
+   43 describe_stmt: DESCRIBE IDENTIFIER • SEMICOLON
+
+    SEMICOLON  shift, and go to state 44
+
+
+State 24
+
+   44 drop_stmt: DROP TABLE • IDENTIFIER SEMICOLON
+
+    IDENTIFIER  shift, and go to state 45
+
+
+State 25
+
+   45 insert_stmt: INSERT INTO • IDENTIFIER VALUES OPEN_PAR list_values CLOSE_PAR SEMICOLON
+
+    IDENTIFIER  shift, and go to state 46
+
+
+State 26
+
+   51 delete_stmt: DELETE FROM • IDENTIFIER WHERE sexpr SEMICOLON
+
+    IDENTIFIER  shift, and go to state 47
+
+
+State 27
+
+   69 update_stmt: UPDATE IDENTIFIER • SET update_values WHERE sexpr SEMICOLON
+
+    SET  shift, and go to state 48
+
+
+State 28
+
+   21 column: IDENTIFIER •
+
+    $default  reduce using rule 21 (column)
+
+
+State 29
+
+   20 columns: columns • COMMA column
+   73 select_stmt: SELECT columns • FROM table_list WHERE sexpr SEMICOLON
+
+    COMMA  shift, and go to state 49
+    FROM   shift, and go to state 50
+
+
+State 30
+
+   19 columns: column •
+
+    $default  reduce using rule 19 (columns)
+
+
+State 31
+
+   78 cmd: CREATE • TABLE
+
+    TABLE  shift, and go to state 51
+
+
+State 32
+
+   79 cmd: DROP • TABLE
+
+    TABLE  shift, and go to state 52
+
+
+State 33
+
+   81 cmd: INSERT •
+
+    $default  reduce using rule 81 (cmd)
+
+
+State 34
+
+   82 cmd: DELETE •
+
+    $default  reduce using rule 82 (cmd)
+
+
+State 35
+
+   83 cmd: UPDATE •
+
+    $default  reduce using rule 83 (cmd)
+
+
+State 36
+
+   80 cmd: SELECT •
+
+    $default  reduce using rule 80 (cmd)
+
+
+State 37
+
+   76 help_tables: HELP TABLES • SEMICOLON
+
+    SEMICOLON  shift, and go to state 53
+
+
+State 38
+
+   84 cmd: CONDITIONS •
+
+    $default  reduce using rule 84 (cmd)
+
+
+State 39
+
+   77 help_cmd: HELP cmd •
+
+    $default  reduce using rule 77 (help_cmd)
+
+
+State 40
+
+   85 quit_stmt: QUIT SEMICOLON •
+
+    $default  reduce using rule 85 (quit_stmt)
+
+
+State 41
+
+    0 $accept: statements $end •
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
     $default  accept
 
 
-State 19
+State 42
 
     2 statements: statements statement .
 
     $default  reduce using rule 2 (statements)
 
 
+<<<<<<< HEAD
 State 20
 
     8 create_stmt: CREATE TABLE IDENTIFIER . OPEN_PAR definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON
@@ -674,127 +1172,180 @@ State 42
 State 43
 
    45 list_value: STRING .
+=======
+State 43
 
-    $default  reduce using rule 45 (list_value)
+   13 create_stmt: CREATE TABLE IDENTIFIER • OPEN_PAR definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON
+   14            | CREATE TABLE IDENTIFIER • OPEN_PAR definitions COMMA primary_key CLOSE_PAR SEMICOLON
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
+
+    OPEN_PAR  shift, and go to state 54
 
 
 State 44
 
+<<<<<<< HEAD
    43 list_value: NUMBER .
+=======
+   43 describe_stmt: DESCRIBE IDENTIFIER SEMICOLON •
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 43 (list_value)
+    $default  reduce using rule 43 (describe_stmt)
 
 
 State 45
 
+<<<<<<< HEAD
    44 list_value: FLOAT .
+=======
+   44 drop_stmt: DROP TABLE IDENTIFIER • SEMICOLON
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 44 (list_value)
+    SEMICOLON  shift, and go to state 55
 
 
 State 46
 
+<<<<<<< HEAD
    40 insert_stmt: INSERT INTO IDENTIFIER VALUES OPEN_PAR list_values . CLOSE_PAR SEMICOLON
    42 list_values: list_values . COMMA list_value
+=======
+   45 insert_stmt: INSERT INTO IDENTIFIER • VALUES OPEN_PAR list_values CLOSE_PAR SEMICOLON
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    CLOSE_PAR  shift, and go to state 64
-    COMMA      shift, and go to state 65
+    VALUES  shift, and go to state 56
 
 
 State 47
 
+<<<<<<< HEAD
    41 list_values: list_value .
+=======
+   51 delete_stmt: DELETE FROM IDENTIFIER • WHERE sexpr SEMICOLON
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 41 (list_values)
+    WHERE  shift, and go to state 57
 
 
 State 48
 
+<<<<<<< HEAD
    52 scond_b: IDENTIFIER GE . NUMBER
    58        | IDENTIFIER GE . FLOAT
    64        | IDENTIFIER GE . STRING
    70        | IDENTIFIER GE . IDENTIFIER
+=======
+   69 update_stmt: UPDATE IDENTIFIER SET • update_values WHERE sexpr SEMICOLON
+   70 update_values: • update_value
+   71              | • update_values COMMA update_value
+   72 update_value: • IDENTIFIER E diff_value_without_identifier
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    IDENTIFIER  shift, and go to state 66
-    STRING      shift, and go to state 67
-    NUMBER      shift, and go to state 68
-    FLOAT       shift, and go to state 69
+    IDENTIFIER  shift, and go to state 58
+
+    update_values  go to state 59
+    update_value   go to state 60
 
 
 State 49
 
+<<<<<<< HEAD
    53 scond_b: IDENTIFIER GT . NUMBER
    59        | IDENTIFIER GT . FLOAT
    65        | IDENTIFIER GT . STRING
    71        | IDENTIFIER GT . IDENTIFIER
+=======
+   20 columns: columns COMMA • column
+   21 column: • IDENTIFIER
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    IDENTIFIER  shift, and go to state 70
-    STRING      shift, and go to state 71
-    NUMBER      shift, and go to state 72
-    FLOAT       shift, and go to state 73
+    IDENTIFIER  shift, and go to state 28
+
+    column  go to state 61
 
 
 State 50
 
+<<<<<<< HEAD
    56 scond_b: IDENTIFIER LE . NUMBER
    62        | IDENTIFIER LE . FLOAT
    68        | IDENTIFIER LE . STRING
    74        | IDENTIFIER LE . IDENTIFIER
+=======
+   73 select_stmt: SELECT columns FROM • table_list WHERE sexpr SEMICOLON
+   74 table_list: • IDENTIFIER
+   75           | • table_list COMMA IDENTIFIER
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    IDENTIFIER  shift, and go to state 74
-    STRING      shift, and go to state 75
-    NUMBER      shift, and go to state 76
-    FLOAT       shift, and go to state 77
+    IDENTIFIER  shift, and go to state 62
+
+    table_list  go to state 63
 
 
 State 51
 
+<<<<<<< HEAD
    55 scond_b: IDENTIFIER LT . NUMBER
    61        | IDENTIFIER LT . FLOAT
    67        | IDENTIFIER LT . STRING
    73        | IDENTIFIER LT . IDENTIFIER
+=======
+   78 cmd: CREATE TABLE •
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    IDENTIFIER  shift, and go to state 78
-    STRING      shift, and go to state 79
-    NUMBER      shift, and go to state 80
-    FLOAT       shift, and go to state 81
+    $default  reduce using rule 78 (cmd)
 
 
 State 52
 
+<<<<<<< HEAD
    57 scond_b: IDENTIFIER E . NUMBER
    63        | IDENTIFIER E . FLOAT
    69        | IDENTIFIER E . STRING
    75        | IDENTIFIER E . IDENTIFIER
+=======
+   79 cmd: DROP TABLE •
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    IDENTIFIER  shift, and go to state 82
-    STRING      shift, and go to state 83
-    NUMBER      shift, and go to state 84
-    FLOAT       shift, and go to state 85
+    $default  reduce using rule 79 (cmd)
 
 
 State 53
 
+<<<<<<< HEAD
    54 scond_b: IDENTIFIER NE . NUMBER
    60        | IDENTIFIER NE . FLOAT
    66        | IDENTIFIER NE . STRING
    72        | IDENTIFIER NE . IDENTIFIER
+=======
+   76 help_tables: HELP TABLES SEMICOLON •
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    IDENTIFIER  shift, and go to state 86
-    STRING      shift, and go to state 87
-    NUMBER      shift, and go to state 88
-    FLOAT       shift, and go to state 89
+    $default  reduce using rule 76 (help_tables)
 
 
 State 54
 
+<<<<<<< HEAD
    46 delete_stmt: DELETE FROM IDENTIFIER WHERE sexpr SEMICOLON .
+=======
+   13 create_stmt: CREATE TABLE IDENTIFIER OPEN_PAR • definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON
+   14            | CREATE TABLE IDENTIFIER OPEN_PAR • definitions COMMA primary_key CLOSE_PAR SEMICOLON
+   22 definitions: • definition
+   23            | • definitions COMMA definition
+   24 definition: • IDENTIFIER attr_type
+   25           | • IDENTIFIER attr_type CHECK expr
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 46 (delete_stmt)
+    IDENTIFIER  shift, and go to state 64
+
+    definitions  go to state 65
+    definition   go to state 66
 
 
 State 55
 
+<<<<<<< HEAD
    49 sor_expr: sor_expr OR . sand_expr
    50 sand_expr: . sand_expr AND scond_b
    51          | . scond_b
@@ -822,15 +1373,16 @@ State 55
    73        | . IDENTIFIER LT IDENTIFIER
    74        | . IDENTIFIER LE IDENTIFIER
    75        | . IDENTIFIER E IDENTIFIER
+=======
+   44 drop_stmt: DROP TABLE IDENTIFIER SEMICOLON •
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    IDENTIFIER  shift, and go to state 33
-
-    sand_expr  go to state 90
-    scond_b    go to state 37
+    $default  reduce using rule 44 (drop_stmt)
 
 
 State 56
 
+<<<<<<< HEAD
    50 sand_expr: sand_expr AND . scond_b
    52 scond_b: . IDENTIFIER GE NUMBER
    53        | . IDENTIFIER GT NUMBER
@@ -856,35 +1408,69 @@ State 56
    73        | . IDENTIFIER LT IDENTIFIER
    74        | . IDENTIFIER LE IDENTIFIER
    75        | . IDENTIFIER E IDENTIFIER
+=======
+   45 insert_stmt: INSERT INTO IDENTIFIER VALUES • OPEN_PAR list_values CLOSE_PAR SEMICOLON
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    IDENTIFIER  shift, and go to state 33
-
-    scond_b  go to state 91
+    OPEN_PAR  shift, and go to state 67
 
 
 State 57
 
+<<<<<<< HEAD
    21 attr_type: CHAR OPEN_PAR . NUMBER CLOSE_PAR
+=======
+   51 delete_stmt: DELETE FROM IDENTIFIER WHERE • sexpr SEMICOLON
+   52 sexpr: • sor_expr
+   53 sor_expr: • sand_expr
+   54         | • sor_expr OR sand_expr
+   55 sand_expr: • sand_expr AND scond_b
+   56          | • scond_b
+   57 scond_b: • IDENTIFIER GE diff_value
+   58        | • IDENTIFIER GT diff_value
+   59        | • IDENTIFIER NE diff_value
+   60        | • IDENTIFIER LT diff_value
+   61        | • IDENTIFIER LE diff_value
+   62        | • IDENTIFIER E diff_value
+   63        | • OPEN_PAR sexpr CLOSE_PAR
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    NUMBER  shift, and go to state 92
+    OPEN_PAR    shift, and go to state 68
+    IDENTIFIER  shift, and go to state 69
+
+    sexpr      go to state 70
+    sor_expr   go to state 71
+    sand_expr  go to state 72
+    scond_b    go to state 73
 
 
 State 58
 
+<<<<<<< HEAD
    22 attr_type: INT OPEN_PAR . NUMBER CLOSE_PAR
+=======
+   72 update_value: IDENTIFIER • E diff_value_without_identifier
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    NUMBER  shift, and go to state 93
+    E  shift, and go to state 74
 
 
 State 59
 
+<<<<<<< HEAD
    23 attr_type: DECIMAL OPEN_PAR . NUMBER CLOSE_PAR
+=======
+   69 update_stmt: UPDATE IDENTIFIER SET update_values • WHERE sexpr SEMICOLON
+   71 update_values: update_values • COMMA update_value
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    NUMBER  shift, and go to state 94
+    COMMA  shift, and go to state 75
+    WHERE  shift, and go to state 76
 
 
 State 60
 
+<<<<<<< HEAD
    20 definition: IDENTIFIER attr_type CHECK . expr
    26 expr: . or_expr
    27 or_expr: . and_expr
@@ -898,268 +1484,574 @@ State 60
    35          | . IDENTIFIER LE NUMBER
    36          | . IDENTIFIER E NUMBER
    37          | . OPEN_PAR expr CLOSE_PAR
+=======
+   70 update_values: update_value •
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    OPEN_PAR    shift, and go to state 95
-    IDENTIFIER  shift, and go to state 96
-
-    expr       go to state 97
-    or_expr    go to state 98
-    and_expr   go to state 99
-    condition  go to state 100
+    $default  reduce using rule 70 (update_values)
 
 
 State 61
 
+<<<<<<< HEAD
    10 primary_key: PRIMARY . KEY OPEN_PAR columns CLOSE_PAR
+=======
+   20 columns: columns COMMA column •
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    KEY  shift, and go to state 101
+    $default  reduce using rule 20 (columns)
 
 
 State 62
 
+<<<<<<< HEAD
     8 create_stmt: CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key . COMMA foreign_keys CLOSE_PAR SEMICOLON
     9            | CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key . CLOSE_PAR SEMICOLON
+=======
+   74 table_list: IDENTIFIER •
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    CLOSE_PAR  shift, and go to state 102
-    COMMA      shift, and go to state 103
+    $default  reduce using rule 74 (table_list)
 
 
 State 63
 
+<<<<<<< HEAD
    18 definitions: definitions COMMA definition .
+=======
+   73 select_stmt: SELECT columns FROM table_list • WHERE sexpr SEMICOLON
+   75 table_list: table_list • COMMA IDENTIFIER
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 18 (definitions)
+    COMMA  shift, and go to state 77
+    WHERE  shift, and go to state 78
 
 
 State 64
 
+<<<<<<< HEAD
    40 insert_stmt: INSERT INTO IDENTIFIER VALUES OPEN_PAR list_values CLOSE_PAR . SEMICOLON
+=======
+   24 definition: IDENTIFIER • attr_type
+   25           | IDENTIFIER • attr_type CHECK expr
+   26 attr_type: • CHAR OPEN_PAR NUMBER CLOSE_PAR
+   27          | • INT OPEN_PAR NUMBER CLOSE_PAR
+   28          | • DECIMAL OPEN_PAR NUMBER CLOSE_PAR
+   29          | • INT
+   30          | • DECIMAL
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    SEMICOLON  shift, and go to state 104
+    CHAR     shift, and go to state 79
+    INT      shift, and go to state 80
+    DECIMAL  shift, and go to state 81
+
+    attr_type  go to state 82
 
 
 State 65
 
+<<<<<<< HEAD
    42 list_values: list_values COMMA . list_value
    43 list_value: . NUMBER
    44           | . FLOAT
    45           | . STRING
+=======
+   13 create_stmt: CREATE TABLE IDENTIFIER OPEN_PAR definitions • COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON
+   14            | CREATE TABLE IDENTIFIER OPEN_PAR definitions • COMMA primary_key CLOSE_PAR SEMICOLON
+   23 definitions: definitions • COMMA definition
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    STRING  shift, and go to state 43
-    NUMBER  shift, and go to state 44
-    FLOAT   shift, and go to state 45
-
-    list_value  go to state 105
+    COMMA  shift, and go to state 83
 
 
 State 66
 
+<<<<<<< HEAD
    70 scond_b: IDENTIFIER GE IDENTIFIER .
+=======
+   22 definitions: definition •
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 70 (scond_b)
+    $default  reduce using rule 22 (definitions)
 
 
 State 67
 
+<<<<<<< HEAD
    64 scond_b: IDENTIFIER GE STRING .
+=======
+   45 insert_stmt: INSERT INTO IDENTIFIER VALUES OPEN_PAR • list_values CLOSE_PAR SEMICOLON
+   46 list_values: • list_value
+   47            | • list_values COMMA list_value
+   48 list_value: • NUMBER
+   49           | • FLOAT
+   50           | • STRING
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 64 (scond_b)
+    STRING  shift, and go to state 84
+    NUMBER  shift, and go to state 85
+    FLOAT   shift, and go to state 86
+
+    list_values  go to state 87
+    list_value   go to state 88
 
 
 State 68
 
+<<<<<<< HEAD
    52 scond_b: IDENTIFIER GE NUMBER .
+=======
+   52 sexpr: • sor_expr
+   53 sor_expr: • sand_expr
+   54         | • sor_expr OR sand_expr
+   55 sand_expr: • sand_expr AND scond_b
+   56          | • scond_b
+   57 scond_b: • IDENTIFIER GE diff_value
+   58        | • IDENTIFIER GT diff_value
+   59        | • IDENTIFIER NE diff_value
+   60        | • IDENTIFIER LT diff_value
+   61        | • IDENTIFIER LE diff_value
+   62        | • IDENTIFIER E diff_value
+   63        | • OPEN_PAR sexpr CLOSE_PAR
+   63        | OPEN_PAR • sexpr CLOSE_PAR
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 52 (scond_b)
+    OPEN_PAR    shift, and go to state 68
+    IDENTIFIER  shift, and go to state 69
+
+    sexpr      go to state 89
+    sor_expr   go to state 71
+    sand_expr  go to state 72
+    scond_b    go to state 73
 
 
 State 69
 
+<<<<<<< HEAD
    58 scond_b: IDENTIFIER GE FLOAT .
+=======
+   57 scond_b: IDENTIFIER • GE diff_value
+   58        | IDENTIFIER • GT diff_value
+   59        | IDENTIFIER • NE diff_value
+   60        | IDENTIFIER • LT diff_value
+   61        | IDENTIFIER • LE diff_value
+   62        | IDENTIFIER • E diff_value
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 58 (scond_b)
+    GE  shift, and go to state 90
+    GT  shift, and go to state 91
+    LE  shift, and go to state 92
+    LT  shift, and go to state 93
+    E   shift, and go to state 94
+    NE  shift, and go to state 95
 
 
 State 70
 
+<<<<<<< HEAD
    71 scond_b: IDENTIFIER GT IDENTIFIER .
+=======
+   51 delete_stmt: DELETE FROM IDENTIFIER WHERE sexpr • SEMICOLON
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 71 (scond_b)
+    SEMICOLON  shift, and go to state 96
 
 
 State 71
 
+<<<<<<< HEAD
    65 scond_b: IDENTIFIER GT STRING .
+=======
+   52 sexpr: sor_expr •  [CLOSE_PAR, SEMICOLON]
+   54 sor_expr: sor_expr • OR sand_expr
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 65 (scond_b)
+    OR  shift, and go to state 97
+
+    $default  reduce using rule 52 (sexpr)
 
 
 State 72
 
+<<<<<<< HEAD
    53 scond_b: IDENTIFIER GT NUMBER .
+=======
+   53 sor_expr: sand_expr •  [CLOSE_PAR, SEMICOLON, OR]
+   55 sand_expr: sand_expr • AND scond_b
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 53 (scond_b)
+    AND  shift, and go to state 98
+
+    $default  reduce using rule 53 (sor_expr)
 
 
 State 73
 
+<<<<<<< HEAD
    59 scond_b: IDENTIFIER GT FLOAT .
+=======
+   56 sand_expr: scond_b •
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 59 (scond_b)
+    $default  reduce using rule 56 (sand_expr)
 
 
 State 74
 
+<<<<<<< HEAD
    74 scond_b: IDENTIFIER LE IDENTIFIER .
+=======
+   66 diff_value_without_identifier: • STRING
+   67                              | • NUMBER
+   68                              | • FLOAT
+   72 update_value: IDENTIFIER E • diff_value_without_identifier
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 74 (scond_b)
+    STRING  shift, and go to state 99
+    NUMBER  shift, and go to state 100
+    FLOAT   shift, and go to state 101
+
+    diff_value_without_identifier  go to state 102
 
 
 State 75
 
+<<<<<<< HEAD
    68 scond_b: IDENTIFIER LE STRING .
+=======
+   71 update_values: update_values COMMA • update_value
+   72 update_value: • IDENTIFIER E diff_value_without_identifier
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 68 (scond_b)
+    IDENTIFIER  shift, and go to state 58
+
+    update_value  go to state 103
 
 
 State 76
 
+<<<<<<< HEAD
    56 scond_b: IDENTIFIER LE NUMBER .
+=======
+   52 sexpr: • sor_expr
+   53 sor_expr: • sand_expr
+   54         | • sor_expr OR sand_expr
+   55 sand_expr: • sand_expr AND scond_b
+   56          | • scond_b
+   57 scond_b: • IDENTIFIER GE diff_value
+   58        | • IDENTIFIER GT diff_value
+   59        | • IDENTIFIER NE diff_value
+   60        | • IDENTIFIER LT diff_value
+   61        | • IDENTIFIER LE diff_value
+   62        | • IDENTIFIER E diff_value
+   63        | • OPEN_PAR sexpr CLOSE_PAR
+   69 update_stmt: UPDATE IDENTIFIER SET update_values WHERE • sexpr SEMICOLON
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 56 (scond_b)
+    OPEN_PAR    shift, and go to state 68
+    IDENTIFIER  shift, and go to state 69
+
+    sexpr      go to state 104
+    sor_expr   go to state 71
+    sand_expr  go to state 72
+    scond_b    go to state 73
 
 
 State 77
 
+<<<<<<< HEAD
    62 scond_b: IDENTIFIER LE FLOAT .
+=======
+   75 table_list: table_list COMMA • IDENTIFIER
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 62 (scond_b)
+    IDENTIFIER  shift, and go to state 105
 
 
 State 78
 
+<<<<<<< HEAD
    73 scond_b: IDENTIFIER LT IDENTIFIER .
+=======
+   52 sexpr: • sor_expr
+   53 sor_expr: • sand_expr
+   54         | • sor_expr OR sand_expr
+   55 sand_expr: • sand_expr AND scond_b
+   56          | • scond_b
+   57 scond_b: • IDENTIFIER GE diff_value
+   58        | • IDENTIFIER GT diff_value
+   59        | • IDENTIFIER NE diff_value
+   60        | • IDENTIFIER LT diff_value
+   61        | • IDENTIFIER LE diff_value
+   62        | • IDENTIFIER E diff_value
+   63        | • OPEN_PAR sexpr CLOSE_PAR
+   73 select_stmt: SELECT columns FROM table_list WHERE • sexpr SEMICOLON
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 73 (scond_b)
+    OPEN_PAR    shift, and go to state 68
+    IDENTIFIER  shift, and go to state 69
+
+    sexpr      go to state 106
+    sor_expr   go to state 71
+    sand_expr  go to state 72
+    scond_b    go to state 73
 
 
 State 79
 
+<<<<<<< HEAD
    67 scond_b: IDENTIFIER LT STRING .
+=======
+   26 attr_type: CHAR • OPEN_PAR NUMBER CLOSE_PAR
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 67 (scond_b)
+    OPEN_PAR  shift, and go to state 107
 
 
 State 80
 
+<<<<<<< HEAD
    55 scond_b: IDENTIFIER LT NUMBER .
+=======
+   27 attr_type: INT • OPEN_PAR NUMBER CLOSE_PAR
+   29          | INT •  [CHECK, COMMA]
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 55 (scond_b)
+    OPEN_PAR  shift, and go to state 108
+
+    $default  reduce using rule 29 (attr_type)
 
 
 State 81
 
+<<<<<<< HEAD
    61 scond_b: IDENTIFIER LT FLOAT .
+=======
+   28 attr_type: DECIMAL • OPEN_PAR NUMBER CLOSE_PAR
+   30          | DECIMAL •  [CHECK, COMMA]
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 61 (scond_b)
+    OPEN_PAR  shift, and go to state 109
+
+    $default  reduce using rule 30 (attr_type)
 
 
 State 82
 
+<<<<<<< HEAD
    75 scond_b: IDENTIFIER E IDENTIFIER .
+=======
+   24 definition: IDENTIFIER attr_type •  [COMMA]
+   25           | IDENTIFIER attr_type • CHECK expr
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 75 (scond_b)
+    CHECK  shift, and go to state 110
+
+    $default  reduce using rule 24 (definition)
 
 
 State 83
 
+<<<<<<< HEAD
    69 scond_b: IDENTIFIER E STRING .
+=======
+   13 create_stmt: CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA • primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON
+   14            | CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA • primary_key CLOSE_PAR SEMICOLON
+   15 primary_key: • PRIMARY KEY OPEN_PAR columns CLOSE_PAR
+   23 definitions: definitions COMMA • definition
+   24 definition: • IDENTIFIER attr_type
+   25           | • IDENTIFIER attr_type CHECK expr
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 69 (scond_b)
+    PRIMARY     shift, and go to state 111
+    IDENTIFIER  shift, and go to state 64
+
+    primary_key  go to state 112
+    definition   go to state 113
 
 
 State 84
 
+<<<<<<< HEAD
    57 scond_b: IDENTIFIER E NUMBER .
+=======
+   50 list_value: STRING •
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 57 (scond_b)
+    $default  reduce using rule 50 (list_value)
 
 
 State 85
 
+<<<<<<< HEAD
    63 scond_b: IDENTIFIER E FLOAT .
+=======
+   48 list_value: NUMBER •
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 63 (scond_b)
+    $default  reduce using rule 48 (list_value)
 
 
 State 86
 
+<<<<<<< HEAD
    72 scond_b: IDENTIFIER NE IDENTIFIER .
+=======
+   49 list_value: FLOAT •
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 72 (scond_b)
+    $default  reduce using rule 49 (list_value)
 
 
 State 87
 
+<<<<<<< HEAD
    66 scond_b: IDENTIFIER NE STRING .
+=======
+   45 insert_stmt: INSERT INTO IDENTIFIER VALUES OPEN_PAR list_values • CLOSE_PAR SEMICOLON
+   47 list_values: list_values • COMMA list_value
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 66 (scond_b)
+    CLOSE_PAR  shift, and go to state 114
+    COMMA      shift, and go to state 115
 
 
 State 88
 
+<<<<<<< HEAD
    54 scond_b: IDENTIFIER NE NUMBER .
+=======
+   46 list_values: list_value •
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 54 (scond_b)
+    $default  reduce using rule 46 (list_values)
 
 
 State 89
 
+<<<<<<< HEAD
    60 scond_b: IDENTIFIER NE FLOAT .
+=======
+   63 scond_b: OPEN_PAR sexpr • CLOSE_PAR
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 60 (scond_b)
+    CLOSE_PAR  shift, and go to state 116
 
 
 State 90
 
+<<<<<<< HEAD
    49 sor_expr: sor_expr OR sand_expr .  [SEMICOLON, OR]
    50 sand_expr: sand_expr . AND scond_b
+=======
+   57 scond_b: IDENTIFIER GE • diff_value
+   64 diff_value: • IDENTIFIER
+   65           | • diff_value_without_identifier
+   66 diff_value_without_identifier: • STRING
+   67                              | • NUMBER
+   68                              | • FLOAT
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    AND  shift, and go to state 56
+    IDENTIFIER  shift, and go to state 117
+    STRING      shift, and go to state 99
+    NUMBER      shift, and go to state 100
+    FLOAT       shift, and go to state 101
 
-    $default  reduce using rule 49 (sor_expr)
+    diff_value                     go to state 118
+    diff_value_without_identifier  go to state 119
 
 
 State 91
 
+<<<<<<< HEAD
    50 sand_expr: sand_expr AND scond_b .
+=======
+   58 scond_b: IDENTIFIER GT • diff_value
+   64 diff_value: • IDENTIFIER
+   65           | • diff_value_without_identifier
+   66 diff_value_without_identifier: • STRING
+   67                              | • NUMBER
+   68                              | • FLOAT
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 50 (sand_expr)
+    IDENTIFIER  shift, and go to state 117
+    STRING      shift, and go to state 99
+    NUMBER      shift, and go to state 100
+    FLOAT       shift, and go to state 101
+
+    diff_value                     go to state 120
+    diff_value_without_identifier  go to state 119
 
 
 State 92
 
+<<<<<<< HEAD
    21 attr_type: CHAR OPEN_PAR NUMBER . CLOSE_PAR
+=======
+   61 scond_b: IDENTIFIER LE • diff_value
+   64 diff_value: • IDENTIFIER
+   65           | • diff_value_without_identifier
+   66 diff_value_without_identifier: • STRING
+   67                              | • NUMBER
+   68                              | • FLOAT
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    CLOSE_PAR  shift, and go to state 106
+    IDENTIFIER  shift, and go to state 117
+    STRING      shift, and go to state 99
+    NUMBER      shift, and go to state 100
+    FLOAT       shift, and go to state 101
+
+    diff_value                     go to state 121
+    diff_value_without_identifier  go to state 119
 
 
 State 93
 
+<<<<<<< HEAD
    22 attr_type: INT OPEN_PAR NUMBER . CLOSE_PAR
+=======
+   60 scond_b: IDENTIFIER LT • diff_value
+   64 diff_value: • IDENTIFIER
+   65           | • diff_value_without_identifier
+   66 diff_value_without_identifier: • STRING
+   67                              | • NUMBER
+   68                              | • FLOAT
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    CLOSE_PAR  shift, and go to state 107
+    IDENTIFIER  shift, and go to state 117
+    STRING      shift, and go to state 99
+    NUMBER      shift, and go to state 100
+    FLOAT       shift, and go to state 101
+
+    diff_value                     go to state 122
+    diff_value_without_identifier  go to state 119
 
 
 State 94
 
+<<<<<<< HEAD
    23 attr_type: DECIMAL OPEN_PAR NUMBER . CLOSE_PAR
+=======
+   62 scond_b: IDENTIFIER E • diff_value
+   64 diff_value: • IDENTIFIER
+   65           | • diff_value_without_identifier
+   66 diff_value_without_identifier: • STRING
+   67                              | • NUMBER
+   68                              | • FLOAT
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    CLOSE_PAR  shift, and go to state 108
+    IDENTIFIER  shift, and go to state 117
+    STRING      shift, and go to state 99
+    NUMBER      shift, and go to state 100
+    FLOAT       shift, and go to state 101
+
+    diff_value                     go to state 123
+    diff_value_without_identifier  go to state 119
 
 
 State 95
 
+<<<<<<< HEAD
    26 expr: . or_expr
    27 or_expr: . and_expr
    28        | . or_expr OR and_expr
@@ -1173,117 +2065,181 @@ State 95
    36          | . IDENTIFIER E NUMBER
    37          | . OPEN_PAR expr CLOSE_PAR
    37          | OPEN_PAR . expr CLOSE_PAR
+=======
+   59 scond_b: IDENTIFIER NE • diff_value
+   64 diff_value: • IDENTIFIER
+   65           | • diff_value_without_identifier
+   66 diff_value_without_identifier: • STRING
+   67                              | • NUMBER
+   68                              | • FLOAT
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    OPEN_PAR    shift, and go to state 95
-    IDENTIFIER  shift, and go to state 96
+    IDENTIFIER  shift, and go to state 117
+    STRING      shift, and go to state 99
+    NUMBER      shift, and go to state 100
+    FLOAT       shift, and go to state 101
 
-    expr       go to state 109
-    or_expr    go to state 98
-    and_expr   go to state 99
-    condition  go to state 100
+    diff_value                     go to state 124
+    diff_value_without_identifier  go to state 119
 
 
 State 96
 
+<<<<<<< HEAD
    31 condition: IDENTIFIER . GE NUMBER
    32          | IDENTIFIER . GT NUMBER
    33          | IDENTIFIER . NE NUMBER
    34          | IDENTIFIER . LT NUMBER
    35          | IDENTIFIER . LE NUMBER
    36          | IDENTIFIER . E NUMBER
+=======
+   51 delete_stmt: DELETE FROM IDENTIFIER WHERE sexpr SEMICOLON •
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    GE  shift, and go to state 110
-    GT  shift, and go to state 111
-    LE  shift, and go to state 112
-    LT  shift, and go to state 113
-    E   shift, and go to state 114
-    NE  shift, and go to state 115
+    $default  reduce using rule 51 (delete_stmt)
 
 
 State 97
 
+<<<<<<< HEAD
    20 definition: IDENTIFIER attr_type CHECK expr .
+=======
+   54 sor_expr: sor_expr OR • sand_expr
+   55 sand_expr: • sand_expr AND scond_b
+   56          | • scond_b
+   57 scond_b: • IDENTIFIER GE diff_value
+   58        | • IDENTIFIER GT diff_value
+   59        | • IDENTIFIER NE diff_value
+   60        | • IDENTIFIER LT diff_value
+   61        | • IDENTIFIER LE diff_value
+   62        | • IDENTIFIER E diff_value
+   63        | • OPEN_PAR sexpr CLOSE_PAR
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 20 (definition)
+    OPEN_PAR    shift, and go to state 68
+    IDENTIFIER  shift, and go to state 69
+
+    sand_expr  go to state 125
+    scond_b    go to state 73
 
 
 State 98
 
+<<<<<<< HEAD
    26 expr: or_expr .  [CLOSE_PAR, COMMA]
    28 or_expr: or_expr . OR and_expr
+=======
+   55 sand_expr: sand_expr AND • scond_b
+   57 scond_b: • IDENTIFIER GE diff_value
+   58        | • IDENTIFIER GT diff_value
+   59        | • IDENTIFIER NE diff_value
+   60        | • IDENTIFIER LT diff_value
+   61        | • IDENTIFIER LE diff_value
+   62        | • IDENTIFIER E diff_value
+   63        | • OPEN_PAR sexpr CLOSE_PAR
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    OR  shift, and go to state 116
+    OPEN_PAR    shift, and go to state 68
+    IDENTIFIER  shift, and go to state 69
 
-    $default  reduce using rule 26 (expr)
+    scond_b  go to state 126
 
 
 State 99
 
+<<<<<<< HEAD
    27 or_expr: and_expr .  [CLOSE_PAR, COMMA, OR]
    29 and_expr: and_expr . AND condition
+=======
+   66 diff_value_without_identifier: STRING •
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    AND  shift, and go to state 117
-
-    $default  reduce using rule 27 (or_expr)
+    $default  reduce using rule 66 (diff_value_without_identifier)
 
 
 State 100
 
+<<<<<<< HEAD
    30 and_expr: condition .
+=======
+   67 diff_value_without_identifier: NUMBER •
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 30 (and_expr)
+    $default  reduce using rule 67 (diff_value_without_identifier)
 
 
 State 101
 
+<<<<<<< HEAD
    10 primary_key: PRIMARY KEY . OPEN_PAR columns CLOSE_PAR
+=======
+   68 diff_value_without_identifier: FLOAT •
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    OPEN_PAR  shift, and go to state 118
+    $default  reduce using rule 68 (diff_value_without_identifier)
 
 
 State 102
 
+<<<<<<< HEAD
     9 create_stmt: CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key CLOSE_PAR . SEMICOLON
+=======
+   72 update_value: IDENTIFIER E diff_value_without_identifier •
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    SEMICOLON  shift, and go to state 119
+    $default  reduce using rule 72 (update_value)
 
 
 State 103
 
+<<<<<<< HEAD
     8 create_stmt: CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA . foreign_keys CLOSE_PAR SEMICOLON
    11 foreign_keys: . foreign_key
    12             | . foreign_keys COMMA foreign_key
    13 foreign_key: . FOREIGN KEY OPEN_PAR column CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR column CLOSE_PAR
+=======
+   71 update_values: update_values COMMA update_value •
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    FOREIGN  shift, and go to state 120
-
-    foreign_keys  go to state 121
-    foreign_key   go to state 122
+    $default  reduce using rule 71 (update_values)
 
 
 State 104
 
+<<<<<<< HEAD
    40 insert_stmt: INSERT INTO IDENTIFIER VALUES OPEN_PAR list_values CLOSE_PAR SEMICOLON .
+=======
+   69 update_stmt: UPDATE IDENTIFIER SET update_values WHERE sexpr • SEMICOLON
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 40 (insert_stmt)
+    SEMICOLON  shift, and go to state 127
 
 
 State 105
 
+<<<<<<< HEAD
    42 list_values: list_values COMMA list_value .
+=======
+   75 table_list: table_list COMMA IDENTIFIER •
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 42 (list_values)
+    $default  reduce using rule 75 (table_list)
 
 
 State 106
 
+<<<<<<< HEAD
    21 attr_type: CHAR OPEN_PAR NUMBER CLOSE_PAR .
+=======
+   73 select_stmt: SELECT columns FROM table_list WHERE sexpr • SEMICOLON
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 21 (attr_type)
+    SEMICOLON  shift, and go to state 128
 
 
 State 107
 
+<<<<<<< HEAD
    22 attr_type: INT OPEN_PAR NUMBER CLOSE_PAR .
 
     $default  reduce using rule 22 (attr_type)
@@ -1341,12 +2297,16 @@ State 114
 State 115
 
    33 condition: IDENTIFIER NE . NUMBER
+=======
+   26 attr_type: CHAR OPEN_PAR • NUMBER CLOSE_PAR
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
     NUMBER  shift, and go to state 129
 
 
-State 116
+State 108
 
+<<<<<<< HEAD
    28 or_expr: or_expr OR . and_expr
    29 and_expr: . and_expr AND condition
    30         | . condition
@@ -1357,16 +2317,18 @@ State 116
    35          | . IDENTIFIER LE NUMBER
    36          | . IDENTIFIER E NUMBER
    37          | . OPEN_PAR expr CLOSE_PAR
+=======
+   27 attr_type: INT OPEN_PAR • NUMBER CLOSE_PAR
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    OPEN_PAR    shift, and go to state 95
-    IDENTIFIER  shift, and go to state 96
-
-    and_expr   go to state 130
-    condition  go to state 100
+    NUMBER  shift, and go to state 130
 
 
-State 117
+State 109
 
+   28 attr_type: DECIMAL OPEN_PAR • NUMBER CLOSE_PAR
+
+<<<<<<< HEAD
    29 and_expr: and_expr AND . condition
    31 condition: . IDENTIFIER GE NUMBER
    32          | . IDENTIFIER GT NUMBER
@@ -1375,48 +2337,82 @@ State 117
    35          | . IDENTIFIER LE NUMBER
    36          | . IDENTIFIER E NUMBER
    37          | . OPEN_PAR expr CLOSE_PAR
-
-    OPEN_PAR    shift, and go to state 95
-    IDENTIFIER  shift, and go to state 96
-
-    condition  go to state 131
+=======
+    NUMBER  shift, and go to state 131
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
 
-State 118
+State 110
 
+   25 definition: IDENTIFIER attr_type CHECK • expr
+   31 expr: • or_expr
+   32 or_expr: • and_expr
+   33        | • or_expr OR and_expr
+   34 and_expr: • and_expr AND condition
+   35         | • condition
+   36 condition: • IDENTIFIER GE NUMBER
+   37          | • IDENTIFIER GT NUMBER
+   38          | • IDENTIFIER NE NUMBER
+   39          | • IDENTIFIER LT NUMBER
+   40          | • IDENTIFIER LE NUMBER
+   41          | • IDENTIFIER E NUMBER
+   42          | • OPEN_PAR expr CLOSE_PAR
+
+    OPEN_PAR    shift, and go to state 132
+    IDENTIFIER  shift, and go to state 133
+
+<<<<<<< HEAD
    10 primary_key: PRIMARY KEY OPEN_PAR . columns CLOSE_PAR
    14 columns: . column
    15        | . columns COMMA column
    16 column: . IDENTIFIER
+=======
+    expr       go to state 134
+    or_expr    go to state 135
+    and_expr   go to state 136
+    condition  go to state 137
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    IDENTIFIER  shift, and go to state 132
 
-    columns  go to state 133
-    column   go to state 134
+State 111
 
+   15 primary_key: PRIMARY • KEY OPEN_PAR columns CLOSE_PAR
 
-State 119
+    KEY  shift, and go to state 138
 
+<<<<<<< HEAD
     9 create_stmt: CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key CLOSE_PAR SEMICOLON .
+=======
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 9 (create_stmt)
+State 112
 
+   13 create_stmt: CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key • COMMA foreign_keys CLOSE_PAR SEMICOLON
+   14            | CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key • CLOSE_PAR SEMICOLON
 
-State 120
+    CLOSE_PAR  shift, and go to state 139
+    COMMA      shift, and go to state 140
 
+<<<<<<< HEAD
    13 foreign_key: FOREIGN . KEY OPEN_PAR column CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR column CLOSE_PAR
+=======
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    KEY  shift, and go to state 135
+State 113
 
+   23 definitions: definitions COMMA definition •
 
-State 121
+    $default  reduce using rule 23 (definitions)
 
+<<<<<<< HEAD
     8 create_stmt: CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA foreign_keys . CLOSE_PAR SEMICOLON
    12 foreign_keys: foreign_keys . COMMA foreign_key
+=======
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    CLOSE_PAR  shift, and go to state 136
-    COMMA      shift, and go to state 137
+State 114
 
+<<<<<<< HEAD
 
 State 122
 
@@ -1524,115 +2520,646 @@ State 135
 State 136
 
     8 create_stmt: CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR . SEMICOLON
+=======
+   45 insert_stmt: INSERT INTO IDENTIFIER VALUES OPEN_PAR list_values CLOSE_PAR • SEMICOLON
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
     SEMICOLON  shift, and go to state 141
 
 
-State 137
+State 115
 
+<<<<<<< HEAD
    12 foreign_keys: foreign_keys COMMA . foreign_key
    13 foreign_key: . FOREIGN KEY OPEN_PAR column CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR column CLOSE_PAR
+=======
+   47 list_values: list_values COMMA • list_value
+   48 list_value: • NUMBER
+   49           | • FLOAT
+   50           | • STRING
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    FOREIGN  shift, and go to state 120
+    STRING  shift, and go to state 84
+    NUMBER  shift, and go to state 85
+    FLOAT   shift, and go to state 86
 
-    foreign_key  go to state 142
+    list_value  go to state 142
 
 
-State 138
+State 116
 
+<<<<<<< HEAD
    10 primary_key: PRIMARY KEY OPEN_PAR columns CLOSE_PAR .
+=======
+   63 scond_b: OPEN_PAR sexpr CLOSE_PAR •
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 10 (primary_key)
+    $default  reduce using rule 63 (scond_b)
 
 
-State 139
+State 117
 
+<<<<<<< HEAD
    15 columns: columns COMMA . column
    16 column: . IDENTIFIER
+=======
+   64 diff_value: IDENTIFIER •
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    IDENTIFIER  shift, and go to state 132
-
-    column  go to state 143
+    $default  reduce using rule 64 (diff_value)
 
 
-State 140
+State 118
 
+<<<<<<< HEAD
    13 foreign_key: FOREIGN KEY OPEN_PAR . column CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR column CLOSE_PAR
    16 column: . IDENTIFIER
+=======
+   57 scond_b: IDENTIFIER GE diff_value •
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    IDENTIFIER  shift, and go to state 132
-
-    column  go to state 144
+    $default  reduce using rule 57 (scond_b)
 
 
-State 141
+State 119
 
+<<<<<<< HEAD
     8 create_stmt: CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON .
+=======
+   65 diff_value: diff_value_without_identifier •
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 8 (create_stmt)
+    $default  reduce using rule 65 (diff_value)
 
 
-State 142
+State 120
 
+<<<<<<< HEAD
    12 foreign_keys: foreign_keys COMMA foreign_key .
+=======
+   58 scond_b: IDENTIFIER GT diff_value •
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 12 (foreign_keys)
+    $default  reduce using rule 58 (scond_b)
 
 
-State 143
+State 121
 
+<<<<<<< HEAD
    15 columns: columns COMMA column .
+=======
+   61 scond_b: IDENTIFIER LE diff_value •
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 15 (columns)
+    $default  reduce using rule 61 (scond_b)
 
 
-State 144
+State 122
 
+<<<<<<< HEAD
    13 foreign_key: FOREIGN KEY OPEN_PAR column . CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR column CLOSE_PAR
+=======
+   60 scond_b: IDENTIFIER LT diff_value •
+
+    $default  reduce using rule 60 (scond_b)
+
+
+State 123
+
+   62 scond_b: IDENTIFIER E diff_value •
+
+    $default  reduce using rule 62 (scond_b)
+
+
+State 124
+
+   59 scond_b: IDENTIFIER NE diff_value •
+
+    $default  reduce using rule 59 (scond_b)
+
+
+State 125
+
+   54 sor_expr: sor_expr OR sand_expr •  [CLOSE_PAR, SEMICOLON, OR]
+   55 sand_expr: sand_expr • AND scond_b
+
+    AND  shift, and go to state 98
+
+    $default  reduce using rule 54 (sor_expr)
+
+
+State 126
+
+   55 sand_expr: sand_expr AND scond_b •
+
+    $default  reduce using rule 55 (sand_expr)
+
+
+State 127
+
+   69 update_stmt: UPDATE IDENTIFIER SET update_values WHERE sexpr SEMICOLON •
+
+    $default  reduce using rule 69 (update_stmt)
+
+
+State 128
+
+   73 select_stmt: SELECT columns FROM table_list WHERE sexpr SEMICOLON •
+
+    $default  reduce using rule 73 (select_stmt)
+
+
+State 129
+
+   26 attr_type: CHAR OPEN_PAR NUMBER • CLOSE_PAR
+
+    CLOSE_PAR  shift, and go to state 143
+
+
+State 130
+
+   27 attr_type: INT OPEN_PAR NUMBER • CLOSE_PAR
+
+    CLOSE_PAR  shift, and go to state 144
+
+
+State 131
+
+   28 attr_type: DECIMAL OPEN_PAR NUMBER • CLOSE_PAR
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
     CLOSE_PAR  shift, and go to state 145
 
 
+State 132
+
+   31 expr: • or_expr
+   32 or_expr: • and_expr
+   33        | • or_expr OR and_expr
+   34 and_expr: • and_expr AND condition
+   35         | • condition
+   36 condition: • IDENTIFIER GE NUMBER
+   37          | • IDENTIFIER GT NUMBER
+   38          | • IDENTIFIER NE NUMBER
+   39          | • IDENTIFIER LT NUMBER
+   40          | • IDENTIFIER LE NUMBER
+   41          | • IDENTIFIER E NUMBER
+   42          | • OPEN_PAR expr CLOSE_PAR
+   42          | OPEN_PAR • expr CLOSE_PAR
+
+    OPEN_PAR    shift, and go to state 132
+    IDENTIFIER  shift, and go to state 133
+
+    expr       go to state 146
+    or_expr    go to state 135
+    and_expr   go to state 136
+    condition  go to state 137
+
+
+State 133
+
+   36 condition: IDENTIFIER • GE NUMBER
+   37          | IDENTIFIER • GT NUMBER
+   38          | IDENTIFIER • NE NUMBER
+   39          | IDENTIFIER • LT NUMBER
+   40          | IDENTIFIER • LE NUMBER
+   41          | IDENTIFIER • E NUMBER
+
+    GE  shift, and go to state 147
+    GT  shift, and go to state 148
+    LE  shift, and go to state 149
+    LT  shift, and go to state 150
+    E   shift, and go to state 151
+    NE  shift, and go to state 152
+
+
+State 134
+
+   25 definition: IDENTIFIER attr_type CHECK expr •
+
+    $default  reduce using rule 25 (definition)
+
+
+State 135
+
+   31 expr: or_expr •  [CLOSE_PAR, COMMA]
+   33 or_expr: or_expr • OR and_expr
+
+    OR  shift, and go to state 153
+
+    $default  reduce using rule 31 (expr)
+
+
+State 136
+
+   32 or_expr: and_expr •  [CLOSE_PAR, COMMA, OR]
+   34 and_expr: and_expr • AND condition
+
+    AND  shift, and go to state 154
+
+    $default  reduce using rule 32 (or_expr)
+
+
+State 137
+
+   35 and_expr: condition •
+
+    $default  reduce using rule 35 (and_expr)
+
+
+State 138
+
+   15 primary_key: PRIMARY KEY • OPEN_PAR columns CLOSE_PAR
+
+    OPEN_PAR  shift, and go to state 155
+
+
+State 139
+
+   14 create_stmt: CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key CLOSE_PAR • SEMICOLON
+
+    SEMICOLON  shift, and go to state 156
+
+
+State 140
+
+   13 create_stmt: CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA • foreign_keys CLOSE_PAR SEMICOLON
+   16 foreign_keys: • foreign_key
+   17             | • foreign_keys COMMA foreign_key
+   18 foreign_key: • FOREIGN KEY OPEN_PAR column CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR column CLOSE_PAR
+
+    FOREIGN  shift, and go to state 157
+
+    foreign_keys  go to state 158
+    foreign_key   go to state 159
+
+
+State 141
+
+   45 insert_stmt: INSERT INTO IDENTIFIER VALUES OPEN_PAR list_values CLOSE_PAR SEMICOLON •
+
+    $default  reduce using rule 45 (insert_stmt)
+
+
+State 142
+
+   47 list_values: list_values COMMA list_value •
+
+    $default  reduce using rule 47 (list_values)
+
+
+State 143
+
+   26 attr_type: CHAR OPEN_PAR NUMBER CLOSE_PAR •
+
+    $default  reduce using rule 26 (attr_type)
+
+
+State 144
+
+   27 attr_type: INT OPEN_PAR NUMBER CLOSE_PAR •
+
+    $default  reduce using rule 27 (attr_type)
+
+
 State 145
 
+<<<<<<< HEAD
    13 foreign_key: FOREIGN KEY OPEN_PAR column CLOSE_PAR . REFERENCES IDENTIFIER OPEN_PAR column CLOSE_PAR
+=======
+   28 attr_type: DECIMAL OPEN_PAR NUMBER CLOSE_PAR •
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    REFERENCES  shift, and go to state 146
+    $default  reduce using rule 28 (attr_type)
 
 
 State 146
 
+<<<<<<< HEAD
    13 foreign_key: FOREIGN KEY OPEN_PAR column CLOSE_PAR REFERENCES . IDENTIFIER OPEN_PAR column CLOSE_PAR
+=======
+   42 condition: OPEN_PAR expr • CLOSE_PAR
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    IDENTIFIER  shift, and go to state 147
+    CLOSE_PAR  shift, and go to state 160
 
 
 State 147
 
+<<<<<<< HEAD
    13 foreign_key: FOREIGN KEY OPEN_PAR column CLOSE_PAR REFERENCES IDENTIFIER . OPEN_PAR column CLOSE_PAR
+=======
+   36 condition: IDENTIFIER GE • NUMBER
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    OPEN_PAR  shift, and go to state 148
+    NUMBER  shift, and go to state 161
 
 
 State 148
 
+<<<<<<< HEAD
    13 foreign_key: FOREIGN KEY OPEN_PAR column CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR . column CLOSE_PAR
    16 column: . IDENTIFIER
+=======
+   37 condition: IDENTIFIER GT • NUMBER
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    IDENTIFIER  shift, and go to state 132
-
-    column  go to state 149
+    NUMBER  shift, and go to state 162
 
 
 State 149
 
+<<<<<<< HEAD
    13 foreign_key: FOREIGN KEY OPEN_PAR column CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR column . CLOSE_PAR
+=======
+   40 condition: IDENTIFIER LE • NUMBER
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    CLOSE_PAR  shift, and go to state 150
+    NUMBER  shift, and go to state 163
 
 
 State 150
 
+<<<<<<< HEAD
    13 foreign_key: FOREIGN KEY OPEN_PAR column CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR column CLOSE_PAR .
+=======
+   39 condition: IDENTIFIER LT • NUMBER
+>>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
-    $default  reduce using rule 13 (foreign_key)
+    NUMBER  shift, and go to state 164
+
+
+State 151
+
+   41 condition: IDENTIFIER E • NUMBER
+
+    NUMBER  shift, and go to state 165
+
+
+State 152
+
+   38 condition: IDENTIFIER NE • NUMBER
+
+    NUMBER  shift, and go to state 166
+
+
+State 153
+
+   33 or_expr: or_expr OR • and_expr
+   34 and_expr: • and_expr AND condition
+   35         | • condition
+   36 condition: • IDENTIFIER GE NUMBER
+   37          | • IDENTIFIER GT NUMBER
+   38          | • IDENTIFIER NE NUMBER
+   39          | • IDENTIFIER LT NUMBER
+   40          | • IDENTIFIER LE NUMBER
+   41          | • IDENTIFIER E NUMBER
+   42          | • OPEN_PAR expr CLOSE_PAR
+
+    OPEN_PAR    shift, and go to state 132
+    IDENTIFIER  shift, and go to state 133
+
+    and_expr   go to state 167
+    condition  go to state 137
+
+
+State 154
+
+   34 and_expr: and_expr AND • condition
+   36 condition: • IDENTIFIER GE NUMBER
+   37          | • IDENTIFIER GT NUMBER
+   38          | • IDENTIFIER NE NUMBER
+   39          | • IDENTIFIER LT NUMBER
+   40          | • IDENTIFIER LE NUMBER
+   41          | • IDENTIFIER E NUMBER
+   42          | • OPEN_PAR expr CLOSE_PAR
+
+    OPEN_PAR    shift, and go to state 132
+    IDENTIFIER  shift, and go to state 133
+
+    condition  go to state 168
+
+
+State 155
+
+   15 primary_key: PRIMARY KEY OPEN_PAR • columns CLOSE_PAR
+   19 columns: • column
+   20        | • columns COMMA column
+   21 column: • IDENTIFIER
+
+    IDENTIFIER  shift, and go to state 28
+
+    columns  go to state 169
+    column   go to state 30
+
+
+State 156
+
+   14 create_stmt: CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key CLOSE_PAR SEMICOLON •
+
+    $default  reduce using rule 14 (create_stmt)
+
+
+State 157
+
+   18 foreign_key: FOREIGN • KEY OPEN_PAR column CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR column CLOSE_PAR
+
+    KEY  shift, and go to state 170
+
+
+State 158
+
+   13 create_stmt: CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA foreign_keys • CLOSE_PAR SEMICOLON
+   17 foreign_keys: foreign_keys • COMMA foreign_key
+
+    CLOSE_PAR  shift, and go to state 171
+    COMMA      shift, and go to state 172
+
+
+State 159
+
+   16 foreign_keys: foreign_key •
+
+    $default  reduce using rule 16 (foreign_keys)
+
+
+State 160
+
+   42 condition: OPEN_PAR expr CLOSE_PAR •
+
+    $default  reduce using rule 42 (condition)
+
+
+State 161
+
+   36 condition: IDENTIFIER GE NUMBER •
+
+    $default  reduce using rule 36 (condition)
+
+
+State 162
+
+   37 condition: IDENTIFIER GT NUMBER •
+
+    $default  reduce using rule 37 (condition)
+
+
+State 163
+
+   40 condition: IDENTIFIER LE NUMBER •
+
+    $default  reduce using rule 40 (condition)
+
+
+State 164
+
+   39 condition: IDENTIFIER LT NUMBER •
+
+    $default  reduce using rule 39 (condition)
+
+
+State 165
+
+   41 condition: IDENTIFIER E NUMBER •
+
+    $default  reduce using rule 41 (condition)
+
+
+State 166
+
+   38 condition: IDENTIFIER NE NUMBER •
+
+    $default  reduce using rule 38 (condition)
+
+
+State 167
+
+   33 or_expr: or_expr OR and_expr •  [CLOSE_PAR, COMMA, OR]
+   34 and_expr: and_expr • AND condition
+
+    AND  shift, and go to state 154
+
+    $default  reduce using rule 33 (or_expr)
+
+
+State 168
+
+   34 and_expr: and_expr AND condition •
+
+    $default  reduce using rule 34 (and_expr)
+
+
+State 169
+
+   15 primary_key: PRIMARY KEY OPEN_PAR columns • CLOSE_PAR
+   20 columns: columns • COMMA column
+
+    CLOSE_PAR  shift, and go to state 173
+    COMMA      shift, and go to state 49
+
+
+State 170
+
+   18 foreign_key: FOREIGN KEY • OPEN_PAR column CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR column CLOSE_PAR
+
+    OPEN_PAR  shift, and go to state 174
+
+
+State 171
+
+   13 create_stmt: CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR • SEMICOLON
+
+    SEMICOLON  shift, and go to state 175
+
+
+State 172
+
+   17 foreign_keys: foreign_keys COMMA • foreign_key
+   18 foreign_key: • FOREIGN KEY OPEN_PAR column CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR column CLOSE_PAR
+
+    FOREIGN  shift, and go to state 157
+
+    foreign_key  go to state 176
+
+
+State 173
+
+   15 primary_key: PRIMARY KEY OPEN_PAR columns CLOSE_PAR •
+
+    $default  reduce using rule 15 (primary_key)
+
+
+State 174
+
+   18 foreign_key: FOREIGN KEY OPEN_PAR • column CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR column CLOSE_PAR
+   21 column: • IDENTIFIER
+
+    IDENTIFIER  shift, and go to state 28
+
+    column  go to state 177
+
+
+State 175
+
+   13 create_stmt: CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA foreign_keys CLOSE_PAR SEMICOLON •
+
+    $default  reduce using rule 13 (create_stmt)
+
+
+State 176
+
+   17 foreign_keys: foreign_keys COMMA foreign_key •
+
+    $default  reduce using rule 17 (foreign_keys)
+
+
+State 177
+
+   18 foreign_key: FOREIGN KEY OPEN_PAR column • CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR column CLOSE_PAR
+
+    CLOSE_PAR  shift, and go to state 178
+
+
+State 178
+
+   18 foreign_key: FOREIGN KEY OPEN_PAR column CLOSE_PAR • REFERENCES IDENTIFIER OPEN_PAR column CLOSE_PAR
+
+    REFERENCES  shift, and go to state 179
+
+
+State 179
+
+   18 foreign_key: FOREIGN KEY OPEN_PAR column CLOSE_PAR REFERENCES • IDENTIFIER OPEN_PAR column CLOSE_PAR
+
+    IDENTIFIER  shift, and go to state 180
+
+
+State 180
+
+   18 foreign_key: FOREIGN KEY OPEN_PAR column CLOSE_PAR REFERENCES IDENTIFIER • OPEN_PAR column CLOSE_PAR
+
+    OPEN_PAR  shift, and go to state 181
+
+
+State 181
+
+   18 foreign_key: FOREIGN KEY OPEN_PAR column CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR • column CLOSE_PAR
+   21 column: • IDENTIFIER
+
+    IDENTIFIER  shift, and go to state 28
+
+    column  go to state 182
+
+
+State 182
+
+   18 foreign_key: FOREIGN KEY OPEN_PAR column CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR column • CLOSE_PAR
+
+    CLOSE_PAR  shift, and go to state 183
+
+
+State 183
+
+   18 foreign_key: FOREIGN KEY OPEN_PAR column CLOSE_PAR REFERENCES IDENTIFIER OPEN_PAR column CLOSE_PAR •
+
+    $default  reduce using rule 18 (foreign_key)

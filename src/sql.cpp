@@ -1,4 +1,3 @@
-#include "sql.h"
 #include "config.h"
 #include "node.h"
 #include "parser.hpp"
@@ -79,7 +78,7 @@ std::string convert_to_string(cond *conditions)
 	       std::to_string(conditions->number);
 }
 
-void get_to_table_in_catalog(std::fstream &file, std::string &table_name)
+void get_to_table_in_catalog(std::fstream &file, std::string const  &table_name)
 {
 	std::string line;
 	// compare each line with the table name
@@ -250,13 +249,12 @@ int create_table(std::string &table_name, col_list *cols)
 	file << table_name << "\n";
 	for (col *column : *cols)
 	{
-		col temp = *column;
-		file << ":" << temp.column_name << ":" << temp.type << ":" << temp.length
-		     << ":" << temp.primary_key << "\n";
+		file << ":" << column->column_name << ":" << column->type << ":" << column->length
+		     << ":" << column->primary_key << "\n";
 		file << ":";
-		write_condition(temp.conditions, file);
+		write_condition(column->conditions, file);
 		file << "\n";
-		file << "::" << temp.referencing_tab << "," << temp.referencing_col << "\n";
+		file << "::" << column->referencing_tab << "," << column->referencing_col << "\n";
 		file << "::\n";
 	}
 	file.close();
@@ -270,7 +268,8 @@ int create_table(std::string &table_name, col_list *cols)
 void makes_referenced_list(std::string &line, referenced_list &list)
 {
 	/*
-	   takes the input string parses it and then returns the result in list
+	 * The references are stored in the list variable.
+	 * Takes the input string parses it and then returns the result in list
 	*/
 	std::vector<std::string> raw_referenced_list = tokenize(line, ":");
 	std::vector<std::string> temp;
@@ -285,8 +284,18 @@ void makes_referenced_list(std::string &line, referenced_list &list)
 	}
 }
 
-cond *get_condition(std::string &line, std::string &table_name)
+cond *get_condition(std::string &line, std::string &column_name)
 {
+	/*
+	 * Get conditions
+	 *      transforms the string representation of the condition tree to
+	 *      condition tree
+	 *  Parameter  :
+	 *      line : the string representation
+	 *      column_name : the specified column for which the conditions tree must be there
+	 *  Returns :
+	 *      The condition node cond pointer
+	 * */
 	int16_t relation_type, number;
 	cond *node;
 	if (line[0] == '#')
@@ -309,14 +318,14 @@ cond *get_condition(std::string &line, std::string &table_name)
 			number_str += line[position++];
 		number = std::stoi(number_str);
 		line = line.substr(position);
-		node = new cond(relation_type, number, table_name);
-		node->left = get_condition(line, table_name);
-		node->right = get_condition(line, table_name);
+		node = new cond(relation_type, number, column_name);
+		node->left = get_condition(line, column_name);
+		node->right = get_condition(line, column_name);
 	}
 	return node;
 }
 
-col_list *get_table(std::string &table_name)
+col_list *get_table(std::string const &table_name)
 {
 	/*
 	file structure :
@@ -438,10 +447,6 @@ void display_table(col_list *cols)
 
 void drop_table(std::string table_name)
 {
-	/*
-	  The reference
-
-	*/
 	std::ofstream buffer(BUFFER0);
 	std::fstream file(CATALOG_PATH);
 	std::string line;
@@ -455,14 +460,12 @@ void drop_table(std::string table_name)
 				std::getline(file, line);
 				std::getline(file, line);
 			}
+			file.seekg((int)file.tellg() - line.length() - 1, file.beg);
+			continue;
 		}
-		else
-		{
+		buffer << line << "\n";
+		while (std::getline(file, line) and line[0] == ':')
 			buffer << line << "\n";
-			while (std::getline(file, line) and line[0] == ':')
-				buffer << line << "\n";
-		}
-		file.seekg((int)file.tellg() - line.length() - 1, file.beg);
 	}
 	buffer.close();
 	file.close();
@@ -475,6 +478,15 @@ void drop_table(std::string table_name)
 
 bool check_column_insertion(col *column, Values *val)
 {
+	/*
+	 * Given :
+	 *  column and the values
+	 * Check the column constraints and also the length and data of the val and the col .
+	 * Returns :
+	 *  True : if satisfy all the column constraints, not
+	 *         checking the primary and foreign key constraints
+	 *  False : if not satisfied
+	 * */
 	if (column->type != val->type or column->length < val->data.length())
 		return false;
 	switch (val->type)
@@ -491,6 +503,7 @@ bool check_column_insertion(col *column, Values *val)
 				float number = std::stoi(val->data);
 				if (column->conditions and !column->conditions->apply(number))
 					return false;
+				break;
 			}
 		default:
 			return true;
@@ -500,6 +513,13 @@ bool check_column_insertion(col *column, Values *val)
 
 bool check_primary_key(std::string table_name, Values *val, int index)
 {
+	/*
+	 * Check inside the table_name for the val->data at the index position
+	 * after parsing.
+	 * Returns :
+	 *  True : if the element is present in table
+	 *  False : if not present
+	 * */
 	std::ifstream file(PATH + table_name);
 	std::string line;
 	while (std::getline(file, line))
@@ -517,6 +537,12 @@ bool check_primary_key(std::string table_name, Values *val, int index)
 bool check_foreign_key(std::string &table_name, std::string &column_name,
                        Values *val)
 {
+	/*
+	 * Check the table and the specified column name
+	 * Returns :
+	 *  True : if the element exists in the table_name and the specified column name
+	 *  False : if not exists
+	 * */
 	col_list *cols = get_table(table_name);
 	int index = 0;
 	for (col *column : *cols)
@@ -533,15 +559,12 @@ bool check_foreign_key(std::string &table_name, std::string &column_name,
 	while (std::getline(file, line))
 	{
 		std::vector<std::string> tokens = tokenize(line, "#");
-		if (tokens[index] == val->data)
+		if (index < tokens.size() and tokens[index] == val->data)
 		{
 			file.close();
 			return true;
 		}
 	}
-	for (int i = 0; i < cols->size(); i++)
-		delete cols->at(i);
-	delete cols;
 	file.close();
 	return false;
 }
@@ -570,8 +593,11 @@ void insert_into_table(std::string table_name, values_list *list)
 			{
 				file.close();
 				bool is_present = check_primary_key(table_name, list->at(i), i);
-				if (is_present)
+				if (is_present )
+				{
+					file.close();
 					fatal("The key is already present\n");
+				}
 				file.open(PATH + table_name, std::ios_base::in | std::ios_base::app);
 			}
 			if (!cols->at(i)->referencing_tab.empty())
@@ -583,7 +609,10 @@ void insert_into_table(std::string table_name, values_list *list)
 				    check_foreign_key(cols->at(i)->referencing_tab,
 				                      cols->at(i)->referencing_col, list->at(i));
 				if (!foreign_key_present)
+				{
+					file.close();
 					fatal("The foreign does not exist\n");
+				}
 			}
 			file << list->at(i)->data << "#";
 			continue;
@@ -596,10 +625,11 @@ void insert_into_table(std::string table_name, values_list *list)
 	file << "\n";
 	file.close();
 }
-bool check_condition(std::vector<std::string> strings, select_cond *conditions,
-                     std::unordered_map<std::string, int> &map, col_list *cols)
+bool check_condition(std::vector<std::string> const  &strings, select_cond *conditions,
+                     std::unordered_map<std::string, int>  &map, col_list *cols)
 {
-	// need to implement this feature
+	if(conditions == nullptr)
+		return true;
 	if(conditions->relation_type == GE and conditions->op2.type == INT)
 	{
 		int number1 = std::stoi(strings[map[conditions->op1]]);
@@ -620,8 +650,10 @@ bool check_condition(std::vector<std::string> strings, select_cond *conditions,
 		{
 			// this means they are compatible and hence the conditions must me checked
 			int16_t type = cols->at(map[conditions->op1])->type;
-			std::string op1 = conditions->op1;
-			std::string op2 = conditions->op2.data;
+			std::string col1 = conditions->op1;
+			std::string col2 = conditions->op2.data;
+			std::string op1 = strings[map[col1]];
+			std::string op2 = strings[map[col2]];
 			switch(type)
 			{
 				case INT:
@@ -665,8 +697,10 @@ bool check_condition(std::vector<std::string> strings, select_cond *conditions,
 		{
 			// this means they are compatible and hence the conditions must me checked
 			int16_t type = cols->at(map[conditions->op1])->type;
-			std::string op1 = conditions->op1;
-			std::string op2 = conditions->op2.data;
+			std::string col1 = conditions->op1;
+			std::string col2 = conditions->op2.data;
+			std::string op1 = strings[map[col1]];
+			std::string op2 = strings[map[col2]];
 			switch(type)
 			{
 				case INT:
@@ -710,8 +744,10 @@ bool check_condition(std::vector<std::string> strings, select_cond *conditions,
 		{
 			// this means they are compatible and hence the conditions must me checked
 			int16_t type = cols->at(map[conditions->op1])->type;
-			std::string op1 = conditions->op1;
-			std::string op2 = conditions->op2.data;
+			std::string col1 = conditions->op1;
+			std::string col2 = conditions->op2.data;
+			std::string op1 = strings[map[col1]];
+			std::string op2 = strings[map[col2]];
 			switch(type)
 			{
 				case INT:
@@ -755,8 +791,10 @@ bool check_condition(std::vector<std::string> strings, select_cond *conditions,
 		{
 			// this means they are compatible and hence the conditions must me checked
 			int16_t type = cols->at(map[conditions->op1])->type;
-			std::string op1 = conditions->op1;
-			std::string op2 = conditions->op2.data;
+			std::string col1 = conditions->op1;
+			std::string col2 = conditions->op2.data;
+			std::string op1 = strings[map[col1]];
+			std::string op2 = strings[map[col2]];
 			switch(type)
 			{
 				case INT:
@@ -790,7 +828,7 @@ bool check_condition(std::vector<std::string> strings, select_cond *conditions,
 	{
 		float number1 = std::stoi(strings[map[conditions->op1]]);
 		float number2 = std::stoi(conditions->op2.data);
-		return number1 < number2;
+		return number1 == number2;
 	}
 	else if(conditions->relation_type == E and conditions->op2.type == CHAR)
 		return strings[map[conditions->op1]].compare(conditions->op2.data) == 0;
@@ -800,8 +838,10 @@ bool check_condition(std::vector<std::string> strings, select_cond *conditions,
 		{
 			// this means they are compatible and hence the conditions must me checked
 			int16_t type = cols->at(map[conditions->op1])->type;
-			std::string op1 = conditions->op1;
-			std::string op2 = conditions->op2.data;
+			std::string col1 = conditions->op1;
+			std::string col2 = conditions->op2.data;
+			std::string op1 = strings[map[col1]];
+			std::string op2 = strings[map[col2]];
 			switch(type)
 			{
 				case INT:
@@ -839,14 +879,16 @@ bool check_condition(std::vector<std::string> strings, select_cond *conditions,
 	}
 	else if(conditions->relation_type == NE and conditions->op2.type == CHAR)
 		return strings[map[conditions->op1]].compare(conditions->op2.data) != 0;
-	else if(conditions->relation_type == E and conditions->op2.type == IDENTIFIER)
+	else if(conditions->relation_type == NE and conditions->op2.type == IDENTIFIER)
 	{
 		if(cols->at(map[conditions->op1])->type == cols->at(map[conditions->op2.data])->type)
 		{
 			// this means they are compatible and hence the conditions must me checked
 			int16_t type = cols->at(map[conditions->op1])->type;
-			std::string op1 = conditions->op1;
-			std::string op2 = conditions->op2.data;
+			std::string col1 = conditions->op1;
+			std::string col2 = conditions->op2.data;
+			std::string op1 = strings[map[col1]];
+			std::string op2 = strings[map[col2]];
 			switch(type)
 			{
 				case INT:
@@ -891,23 +933,216 @@ void delete_from_table(std::string table_name, select_cond *conditions)
 	for(int i = 0; i < cols->size(); i++)
 		map[cols->at(i)->column_name] = i;
 	std::fstream file(PATH + table_name, std::ios_base::in);
-	std::fstream buffer(BUFFER_TABLE0, std::ios_base::out);
+	std::fstream buffer0(BUFFER_TABLE0, std::ios_base::out);
 	std::string line;
 	int line_count = 0;
 	while(std::getline(file, line))
 	{
 		std::vector<std::string> strings = tokenize(line, "#");
-		if(check_condition(strings, conditions, map, cols) == true)
+		if(check_condition(strings, conditions, map, cols) == true )
 		{
 			// this is to be deleted
+			line_count++;
 			continue;
 		}
-		line_count++;
-		buffer << line << "\n";
+		buffer0 << line << "\n";
 	}
 	file.close();
-	buffer.close();
-	//std::string file_path(PATH);
-	//file_path += table_name;
-	//std::rename(BUFFER0, file_path.c_str());
+	buffer0.close();
+	std::string file_path(PATH);
+	file_path += table_name;
+	std::remove(file_path.c_str());
+	std::rename(BUFFER_TABLE0, file_path.c_str());
+	for(int i = 0; i < cols->size(); i++)
+		delete cols->at(i);
+	delete cols;
+	std::cout << line_count << " rows were affected.\n";
 }
+
+void insert_record(std::fstream &file, std::vector<std::string>const &strings)
+{
+	int size = strings.size();
+	for(int i = 0; i < size - 1 ; i++)
+		file << strings[i] << "#";
+	file << "\n";
+}
+
+
+
+void update_table(std::string table_name, update_sets *list, select_cond *conditions)
+{
+	col_list *cols = get_table(table_name);
+	std::unordered_map<std::string, int> map;
+	for(int i = 0; i < cols->size(); i++)
+		map[cols->at(i)->column_name] = i;
+	std::unordered_map<int, std::string> update_map;
+	for(update_set *element : *list )
+	{
+		// error checking part
+		if (cols->at(map[element->column_name])->primary_key
+		        and check_primary_key(table_name, &element->val, map[element->column_name]))
+			fatal("Primary already present\n");
+		else if ( !cols->at(map[element->column_name])->referencing_tab.empty())
+		{
+			// this is foreign key
+			col *column = cols->at(map[element->column_name]);
+			if(!check_foreign_key(column->referencing_tab, column->referencing_col, &element->val))
+				fatal("The foreign key does not exist");
+		}
+		// actual updation
+		update_map[map[element->column_name]] = element->val.data;
+	}
+	std::fstream file(PATH + table_name, std::ios_base::in);
+	std::fstream buffer0(BUFFER_TABLE0, std::ios_base::out);
+	std::string line;
+	int line_count = 0;
+	while(std::getline(file, line))
+	{
+		std::vector<std::string> strings = tokenize(line, "#");
+		if(check_condition(strings, conditions, map, cols) == true )
+		{
+			for(auto element : update_map)
+				strings[element.first] = element.second;
+			insert_record(buffer0, strings);
+			line_count++;
+			continue;
+		}
+		buffer0 << line << "\n";
+	}
+	file.close();
+	buffer0.close();
+	std::string file_path(PATH);
+	file_path += table_name;
+	std::remove(file_path.c_str());
+	std::rename(BUFFER_TABLE0, file_path.c_str());
+	for(int i = 0; i < cols->size(); i++)
+		delete cols->at(i);
+	delete cols;
+	std::cout << line_count << " rows were affected.\n";
+}
+
+
+
+void select_recurse(std::vector<std::string> &record,
+                    select_cond *conditions,
+                    std::unordered_map<std::string, int> &map,
+                    int index,
+                    std::vector<std::string *> *table_names,
+                    col_list *cols,
+                    std::vector<std::string *> *selected_columns,
+                    std::vector<std::vector<std::string>> &result)
+{
+	if(index >= table_names->size() and check_condition(record, conditions, map, cols))
+	{
+		std::vector<std::string> temp;
+		for(int i = 0; i < selected_columns->size(); i++)
+		{
+			int col_index = map[*selected_columns->at(i)];
+			temp.push_back(record[col_index]);
+		}
+		result.push_back(temp);
+	}
+	else if (index < table_names->size())
+	{
+		std::fstream file(PATH + *table_names->at(index), std::ios_base::in);
+		std::string line;
+		std::vector<std::string> attrs = record;
+		std::vector<std::string> curr_record;
+		while(std::getline(file, line))
+		{
+			curr_record = tokenize(line, "#");
+			for(int i = 0; i < curr_record.size() - 1 ; i++)
+				attrs.push_back(curr_record[i]);
+			select_recurse(attrs, conditions, map, index + 1, table_names, cols, selected_columns, result);
+			attrs = record;
+		}
+		file.close();
+	}
+}
+
+void display_record(std::vector<std::string *> *column_selected,
+                    std::vector<std::vector<std::string>> &result,
+                    col_list *cols,
+                    std::unordered_map<std::string, int> &map)
+{
+	std::cout << "\n";
+	for(int i = 0; i < column_selected->size(); i++)
+	{
+		//int index = map[*column_selected->at(i)];
+		std::cout.width(20 + PADDING);
+		std::cout << (*column_selected->at(i));
+	}
+	std::cout << "\n";
+	for(int i = 0; i < result.size(); i++)
+	{
+		for(int j = 0; j < result[i].size(); j++)
+		{
+			//int index = map[*column_selected->at(i)];
+			std::cout.width(20 + PADDING);
+			std::cout << (result[i][j]);
+		}
+		std::cout << "\n";
+	}
+	std::cout << "\n";
+}
+
+
+
+void select_from_tables(std::vector<std::string *> *column_selected,
+                        std::vector<std::string *> *table_names,
+                        select_cond *conditions)
+{
+	col_list *cols = get_table(*table_names->at(0));
+	std::unordered_map<std::string, int> map;
+	int index = 0;
+	for(int i = 0; i < cols->size(); i++)
+		map[cols->at(i)->column_name] = index++;
+	for(int i = 1; i < table_names->size(); i++)
+	{
+		// first iterating through the tables names
+		col_list *temp = get_table(*table_names->at(i));
+		for(int j = 0; j < temp->size(); j++)
+		{
+			// for each col of the current table
+			cols->push_back(temp->at(j));
+			map[temp->at(j)->column_name] = index++;
+		}
+		delete temp;
+	}
+	std::vector<std::string> record;
+	std::vector<std::vector<std::string>> result;
+	select_recurse(record, conditions, map, 0, table_names, cols, column_selected, result);
+	display_record(column_selected, result, cols, map);
+	for(int i = 0; i < table_names->size(); i++)
+		delete table_names->at(i);
+	for(int i = 0; i < column_selected->size(); i++)
+		delete column_selected->at(i);
+	for(int i = 0; i < cols->size(); i++)
+		delete cols->at(i);
+	delete table_names;
+	delete column_selected;
+	delete cols;
+}
+
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
+void help_tables(void)
+{
+	std::string path(PATH);
+	for(auto  &entry : fs::directory_iterator(path))
+	{
+		std::string temp = entry.path();
+		temp = temp.substr(temp.rfind('/') + 1, temp.length() - temp.rfind('/') - 1 );
+		std::cout << temp << "\n";
+	}
+}
+void save_to_buffer(void)
+{
+	fs::copy(BUFFERED, SAVED, fs::copy_options::overwrite_existing |
+	         fs::copy_options::recursive);
+}
+
+
+
+
+
