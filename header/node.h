@@ -61,6 +61,9 @@ class Values {
 	public:
 		std::string data;
 		int type;
+		// type == 1 inter
+		// 	type ===2 string
+		// 	type ==3 float
 		Values(std::string data, int type) : data(data), type(type) {}
 		Values() : data(""), type(-1) {}
 		Values(Values const  &val)

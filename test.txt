@@ -2,7 +2,7 @@ CREATE TABLE department
 (
     departno INT(10)  CHECK  (departno > 1 AND departno <100 )  ,
     departname CHAR(20),
-    PRIMARY KEY (departno)
+    PRIMARY KEY (departno,departname)
 );
 CREATE TABLE student
 (
@@ -21,22 +21,24 @@ INSERT INTO department VALUES (14,'Mech');
 
 
 INSERT INTO student VALUES (1,'Ramesh',11);
-INSERT INTO student VALUES (2,'Suresh',11);
+INSERT INTO student VALUES (2,'Ramesh',14);
 INSERT INTO student VALUES (3,'Raju',11);
-INSERT INTO student VALUES (4,'Bheem',12);
-INSERT INTO student VALUES (5,'Prakash',12);
-INSERT INTO student VALUES (6,'Yash',12);
+INSERT INTO student VALUES (4,'Bheem',13);
+INSERT INTO student VALUES (5,'Prakash',14);
+INSERT INTO student VALUES (6,'Yash',13);
 
 SELECT id,name,departname FROM student,department WHERE departno_s=departno;
 
 UPDATE student SET departno_s=13 WHERE name='Prakash';
 UPDATE student SET name='Kailash' WHERE name='Raju';
 
-SELECT id,name,departno_s FROM student WHERE id>0;
+SELECT id,name,departno_s FROM student;
 
 DELETE FROM student WHERE id=6;
 
+SELECT id,name,departname FROM student,department WHERE departno_s=departno;
 
-SELECT id,name,departno_s FROM student WHERE id>0;
 
+DROP TABLE student;
+DROP TABLE department;
 QUIT;

@@ -15,6 +15,9 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <utility>
+#include <filesystem>
+
 
 auto print = [](auto &remark, auto &v)
 {
@@ -224,7 +227,6 @@ int raise_foreign_key(col_list *cols, reference_list *refer_list)
 	}
 	if (map.size() == 0)
 		return 0;
-	std::cout << "hello world";
 	return 1;
 }
 
@@ -580,6 +582,7 @@ void insert_into_table(std::string table_name, values_list *list)
 {
 	std::string line;
 	col_list *cols = get_table(table_name);
+	std::cout << "after the get table\n";
 	std::fstream file(PATH + table_name, std::ios_base::in | std::ios_base::app);
 	for (int i = 0; i < cols->size(); i++)
 	{
@@ -614,11 +617,12 @@ void insert_into_table(std::string table_name, values_list *list)
 					fatal("The foreign does not exist\n");
 				}
 			}
-			file << list->at(i)->data << "#";
+			line += (list->at(i)->data + "#" );
 			continue;
 		}
 		fatal("The Insertion failed ");
 	}
+	file << line;
 	for (int i = 0; i < cols->size(); i++)
 		delete cols->at(i);
 	delete cols;
@@ -1124,25 +1128,25 @@ void select_from_tables(std::vector<std::string *> *column_selected,
 	delete cols;
 }
 
-#include <experimental/filesystem>
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 void help_tables(void)
 {
-	std::string path(PATH);
-	for(auto  &entry : fs::directory_iterator(path))
+	const fs::path dir{PATH};
+	for(auto  &entry : fs::directory_iterator(dir))
 	{
-		std::string temp = entry.path();
+		std::string temp = entry.path().stem().string();
 		temp = temp.substr(temp.rfind('/') + 1, temp.length() - temp.rfind('/') - 1 );
 		std::cout << temp << "\n";
 	}
 }
 void save_to_buffer(void)
 {
-	fs::copy(BUFFERED, SAVED, fs::copy_options::overwrite_existing |
-	         fs::copy_options::recursive);
+	const auto copyOptions = fs::copy_options::overwrite_existing
+	                         | fs::copy_options::recursive
+	                         ;
+	const fs::path dir1{BUFFERED};
+	const fs::path dir2{SAVED};
+	fs::copy(dir1, dir2, copyOptions);
 }
-
-
-
 
 

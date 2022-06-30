@@ -547,8 +547,13 @@ char *yytext;
 	#include "node.h"
 	#include "parser.hpp"
 
+#line 550 "src\\tokens.cpp"
+#line 551 "src\\tokens.cpp"
+
+#define INITIAL 0
 
 #ifndef YY_NO_UNISTD_H
+/* Special case for "unistd.h", since it is non-ANSI. We include it way
  * down here because we want the user's section 1 to have been scanned first.
  * The user has a chance to override it with an option.
  */
@@ -764,11 +769,7 @@ YY_DECL
 
 
 
-<<<<<<< HEAD
-#line 756 "src\\tokens.cpp"
-=======
-#line 773 "src/tokens.cpp"
->>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
+#line 772 "src\\tokens.cpp"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1057,11 +1058,7 @@ YY_RULE_SETUP
 #line 73 "sql.l"
 ECHO;
 	YY_BREAK
-<<<<<<< HEAD
-#line 1010 "src\\tokens.cpp"
-=======
-#line 1062 "src/tokens.cpp"
->>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
+#line 1061 "src\\tokens.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 

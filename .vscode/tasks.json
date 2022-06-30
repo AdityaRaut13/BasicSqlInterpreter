@@ -6,7 +6,7 @@
         "env": {
                 "build_yacc": "win_bison --defines=header\\parser.hpp --output=src\\parser.cpp --verbose  --report all  --report-file=trace  sql.y",
                 "build_lex": "win_flex -o src\\tokens.cpp sql.l",
-                "build_project": "g++ -g src\\*.cpp -o sql -I header\\ "             ,
+                "build_project": "g++ -g src\\*.cpp -o sql -I header\\  -lstdc++fs",
                 "Test":".\\sql .\\test.txt",
                 "remove_files": "del .\\dbms\\tables\\*"
             }

@@ -44,9 +44,8 @@
 %token CONDITIONS
 
 
-
 %token <string> IDENTIFIER STRING
-%token <ival>  NUMBER;
+%token <ival> NUMBER;
 %token <fval> FLOAT;
 
 %type <string_array> primary_key
@@ -100,6 +99,8 @@ create_stmt:CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA
             
             raise_foreign_key($5,$9);
             raise_primary_key($5,$7);
+            if(check_table(*$3)==true)
+                yyerror("The Table already exists\n");
             create_table(*$3,$5);
 
 
@@ -120,6 +121,8 @@ create_stmt:CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key COMMA
     | CREATE TABLE IDENTIFIER OPEN_PAR definitions COMMA primary_key CLOSE_PAR SEMICOLON
     {
         raise_primary_key($5,$7);
+        if(check_table(*$3)==true)
+                yyerror("The Table already exists\n");
         create_table(*$3,$5);
         for(col* column : *$5)
             delete column;
@@ -413,6 +416,10 @@ select_stmt:SELECT columns FROM table_list WHERE sexpr SEMICOLON
            {
               select_from_tables($2,$4,$6);  
            }
+            |SELECT columns FROM table_list SEMICOLON
+            {
+                select_from_tables($2,$4,nullptr);
+            }
            ;
 table_list:IDENTIFIER
           { 

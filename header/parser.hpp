@@ -43,7 +43,6 @@ extern int yydebug;
 /* Tokens.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
-<<<<<<< HEAD
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
@@ -77,62 +76,18 @@ extern int yydebug;
      DELETE = 285,
      FROM = 286,
      WHERE = 287,
-     IDENTIFIER = 288,
-     STRING = 289,
-     NUMBER = 290,
-     FLOAT = 291
+     UPDATE = 288,
+     SET = 289,
+     SELECT = 290,
+     HELP = 291,
+     TABLES = 292,
+     QUIT = 293,
+     CONDITIONS = 294,
+     IDENTIFIER = 295,
+     STRING = 296,
+     NUMBER = 297,
+     FLOAT = 298
    };
-=======
-  enum yytokentype
-  {
-    YYEMPTY = -2,
-    YYEOF = 0,                     /* "end of file"  */
-    YYerror = 256,                 /* error  */
-    YYUNDEF = 257,                 /* "invalid token"  */
-    CREATE = 258,                  /* CREATE  */
-    TABLE = 259,                   /* TABLE  */
-    CHECK = 260,                   /* CHECK  */
-    PRIMARY = 261,                 /* PRIMARY  */
-    KEY = 262,                     /* KEY  */
-    FOREIGN = 263,                 /* FOREIGN  */
-    REFERENCES = 264,              /* REFERENCES  */
-    CHAR = 265,                    /* CHAR  */
-    INT = 266,                     /* INT  */
-    DECIMAL = 267,                 /* DECIMAL  */
-    OPEN_PAR = 268,                /* OPEN_PAR  */
-    CLOSE_PAR = 269,               /* CLOSE_PAR  */
-    SEMICOLON = 270,               /* SEMICOLON  */
-    COMMA = 271,                   /* COMMA  */
-    OR = 272,                      /* OR  */
-    AND = 273,                     /* AND  */
-    GE = 274,                      /* GE  */
-    GT = 275,                      /* GT  */
-    LE = 276,                      /* LE  */
-    LT = 277,                      /* LT  */
-    E = 278,                       /* E  */
-    NE = 279,                      /* NE  */
-    DESCRIBE = 280,                /* DESCRIBE  */
-    DROP = 281,                    /* DROP  */
-    INSERT = 282,                  /* INSERT  */
-    INTO = 283,                    /* INTO  */
-    VALUES = 284,                  /* VALUES  */
-    DELETE = 285,                  /* DELETE  */
-    FROM = 286,                    /* FROM  */
-    WHERE = 287,                   /* WHERE  */
-    UPDATE = 288,                  /* UPDATE  */
-    SET = 289,                     /* SET  */
-    SELECT = 290,                  /* SELECT  */
-    HELP = 291,                    /* HELP  */
-    TABLES = 292,                  /* TABLES  */
-    QUIT = 293,                    /* QUIT  */
-    CONDITIONS = 294,              /* CONDITIONS  */
-    IDENTIFIER = 295,              /* IDENTIFIER  */
-    STRING = 296,                  /* STRING  */
-    NUMBER = 297,                  /* NUMBER  */
-    FLOAT = 298                    /* FLOAT  */
-  };
-  typedef enum yytokentype yytoken_kind_t;
->>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 #endif
 
 
@@ -157,13 +112,9 @@ typedef union YYSTYPE
     update_sets* list_sets;
     float fval;
 
-<<<<<<< HEAD
-=======
-#line 124 "header/parser.hpp"
->>>>>>> 763a0a4b8d48d943295278ca9167a344d45e9c05
 
 /* Line 2058 of yacc.c  */
-#line 109 "header\\parser.hpp"
+#line 118 "header\\parser.hpp"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
